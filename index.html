@@ -76,6 +76,7 @@
         .checkbox-option {
             display: flex;
             align-items: center;
+            margin-bottom: 5px;
         }
         .checkbox-option input {
             margin-right: 8px;
@@ -109,6 +110,13 @@
         .emoji-title {
             font-size: 18px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .emoji-title:before {
+            content: attr(data-emoji);
+            margin-right: 8px;
+            font-size: 20px;
         }
         .footer {
             text-align: center;
@@ -140,6 +148,10 @@
             color: #e74c3c;
             margin-top: 5px;
         }
+        .section-divider {
+            border-top: 1px dashed #ddd;
+            margin: 25px 0;
+        }
     </style>
 </head>
 <body>
@@ -147,6 +159,7 @@
         <h1>ПРОКАЧКА GTA ONLINE</h1>
         
         <form id="orderForm">
+            <!-- Блок с выбором лаунчера и версии игры -->
             <div class="form-group">
                 <label>В каком лаунчере куплена игра?</label>
                 <div class="radio-group">
@@ -179,6 +192,7 @@
                 </div>
             </div>
             
+            <!-- Блок с логином и паролем -->
             <div class="form-group required">
                 <label for="login">Логин</label>
                 <p class="form-note">Steam — логин | Epic — почта | Rockstar — почта от SocialClub</p>
@@ -190,23 +204,45 @@
                 <input type="password" id="password" name="password" required>
             </div>
             
+            <!-- Блок с выбором валюты -->
             <div class="form-group">
-                <div class="emoji-title">💰 Количество игровой валюты</div>
+                <div class="emoji-title" data-emoji="💰">Количество игровой валюты</div>
                 <select id="money" name="money" class="form-control">
                     <option value="30 млн">30 млн</option>
                     <option value="40 млн">40 млн</option>
                     <option value="50 млн">50 млн</option>
-                    <!-- Остальные варианты валюты -->
+                    <option value="60 млн">60 млн</option>
+                    <option value="70 млн">70 млн</option>
+                    <option value="80 млн">80 млн</option>
+                    <option value="90 млн">90 млн</option>
+                    <option value="100 млн">100 млн</option>
+                    <option value="110 млн">110 млн</option>
+                    <option value="120 млн">120 млн</option>
+                    <option value="130 млн">130 млн</option>
+                    <option value="140 млн">140 млн</option>
+                    <option value="150 млн">150 млн</option>
+                    <option value="160 млн">160 млн</option>
+                    <option value="170 млн">170 млн</option>
+                    <option value="180 млн">180 млн</option>
+                    <option value="190 млн">190 млн</option>
+                    <option value="250 млн">250 млн</option>
+                    <option value="500 млн">500 млн</option>
+                    <option value="750 млн">750 млн</option>
+                    <option value="1 млрд">1 млрд</option>
+                    <option value="2 млрд">2 млрд</option>
+                    <option value="3 млрд">3 млрд</option>
                     <option value="4 млрд">4 млрд</option>
                 </select>
             </div>
             
+            <!-- Блок с уровнем персонажа -->
             <div class="form-group required">
                 <label for="level">Какой уровень персонажа сделать?</label>
                 <p class="form-note">От 1 до 8000</p>
                 <input type="number" id="level" name="level" min="1" max="8000" required>
             </div>
             
+            <!-- Блок с отдельными уровнями -->
             <div class="form-group">
                 <label>Отдельные уровни</label>
                 <div class="checkbox-group">
@@ -225,30 +261,83 @@
                 </div>
             </div>
             
+            <div class="section-divider"></div>
+            
+            <!-- Основные разблокировки -->
             <div class="form-group">
-                <div class="emoji-title">🔓 Основные разблокировки</div>
+                <div class="emoji-title" data-emoji="🔓">Основные разблокировки</div>
                 <div class="checkbox-group">
-                    <!-- Чекбоксы разблокировок -->
                     <div class="checkbox-option">
-                        <input type="checkbox" id="skills" name="skills" value="Открыть все скиллы">
+                        <input type="checkbox" id="skills" name="unlock_skills" value="1">
                         <label for="skills">Открыть все скиллы</label>
                     </div>
-                    <!-- Остальные чекбоксы -->
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="lsc" name="unlock_lsc" value="1">
+                        <label for="lsc">Открыть LSC тюнинг</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="weapons" name="unlock_weapons" value="1">
+                        <label for="weapons">Открыть оружие</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="masks" name="unlock_masks" value="1">
+                        <label for="masks">Открыть маски</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="clothes" name="unlock_clothes" value="1">
+                        <label for="clothes">Открыть одежду</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="parachutes" name="unlock_parachutes" value="1">
+                        <label for="parachutes">Открыть парашюты</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="tattoos" name="unlock_tattoos" value="1">
+                        <label for="tattoos">Открыть татуировки</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="achievements" name="unlock_achievements" value="1">
+                        <label for="achievements">Открыть все достижения</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="contacts" name="unlock_contacts" value="1">
+                        <label for="contacts">Открыть контакты в телефоне</label>
+                    </div>
                 </div>
             </div>
             
+            <div class="section-divider"></div>
+            
+            <!-- Дополнительные опции -->
             <div class="form-group">
-                <div class="emoji-title">🔓 Дополнительно</div>
+                <div class="emoji-title" data-emoji="🔓">Дополнительно</div>
                 <div class="checkbox-group">
-                    <!-- Чекбоксы дополнительных опций -->
                     <div class="checkbox-option">
-                        <input type="checkbox" id="bunker" name="bunker" value="Открыть разработки бункера">
+                        <input type="checkbox" id="bunker" name="unlock_bunker" value="1">
                         <label for="bunker">Открыть разработки бункера</label>
                     </div>
-                    <!-- Остальные чекбоксы -->
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="bunker_rewards" name="unlock_bunker_rewards" value="1">
+                        <label for="bunker_rewards">Открыть награды тира в бункере</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="untrustworthy" name="remove_untrustworthy" value="1">
+                        <label for="untrustworthy">Удалить статус «ненадёжный»</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="kosatka" name="unlock_kosatka" value="1">
+                        <label for="kosatka">Открыть косатку для покупки</label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="gender" name="change_gender" value="1">
+                        <label for="gender">Сменить пол персонажа</label>
+                    </div>
                 </div>
             </div>
             
+            <div class="section-divider"></div>
+            
+            <!-- Блок с контактами и подтверждением оплаты -->
             <div class="form-group required">
                 <label for="contact">Контакты для связи</label>
                 <p class="form-note">Укажите ссылку на ваш VK или Telegram</p>
@@ -301,23 +390,43 @@
                 return;
             }
             
+            // Собираем все чекбоксы
+            const checkboxes = {
+                // Основные разблокировки
+                skills: document.getElementById('skills').checked,
+                lsc: document.getElementById('lsc').checked,
+                weapons: document.getElementById('weapons').checked,
+                masks: document.getElementById('masks').checked,
+                clothes: document.getElementById('clothes').checked,
+                parachutes: document.getElementById('parachutes').checked,
+                tattoos: document.getElementById('tattoos').checked,
+                achievements: document.getElementById('achievements').checked,
+                contacts: document.getElementById('contacts').checked,
+                
+                // Дополнительные опции
+                bunker: document.getElementById('bunker').checked,
+                bunker_rewards: document.getElementById('bunker_rewards').checked,
+                untrustworthy: document.getElementById('untrustworthy').checked,
+                kosatka: document.getElementById('kosatka').checked,
+                gender: document.getElementById('gender').checked,
+                
+                // Уровни
+                gangLevel: document.getElementById('gangLevel').checked,
+                arenaLevel: document.getElementById('arenaLevel').checked,
+                clubLevel: document.getElementById('clubLevel').checked
+            };
+            
             // Собираем данные формы
-            const formData = new FormData(this);
-            const orderData = {
-                launcher: formData.get('launcher'),
-                version: formData.get('version'),
-                login: formData.get('login'),
-                password: formData.get('password'),
-                money: formData.get('money'),
-                level: formData.get('level'),
-                contact: formData.get('contact'),
+            const formData = {
+                launcher: document.querySelector('input[name="launcher"]:checked').value,
+                version: document.querySelector('input[name="version"]:checked').value,
+                login: document.getElementById('login').value,
+                password: document.getElementById('password').value,
+                money: document.getElementById('money').value,
+                level: document.getElementById('level').value,
+                contact: document.getElementById('contact').value,
                 last4digits: last4digits,
-                // Добавляем чекбоксы
-                options: {
-                    gangLevel: formData.get('gangLevel') === '8000',
-                    arenaLevel: formData.get('arenaLevel') === '1000',
-                    // ... остальные опции
-                }
+                options: checkboxes
             };
             
             try {
@@ -327,19 +436,19 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(orderData)
+                    body: JSON.stringify(formData)
                 });
                 
                 const result = await response.json();
                 if (result.success) {
-                    alert(`Заявка №${result.orderId} принята! Проверяем оплату по цифрам ${last4digits}`);
+                    alert(`✅ Заявка №${result.orderId} принята!\nПроверяем оплату по цифрам ${last4digits}`);
                     this.reset();
                 } else {
-                    alert('Ошибка при отправке формы: ' + (result.error || ''));
+                    alert('❌ Ошибка при отправке формы: ' + (result.error || ''));
                 }
             } catch (error) {
                 console.error('Ошибка:', error);
-                alert('Произошла ошибка при отправке формы');
+                alert('❌ Произошла ошибка при отправке формы. Пожалуйста, свяжитесь с нами через VK');
             }
         });
     </script>
