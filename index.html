@@ -131,6 +131,7 @@
         .card-input {
             display: flex;
             align-items: center;
+            margin-bottom: 10px;
         }
         .card-input span {
             margin-right: 5px;
@@ -151,6 +152,15 @@
         .section-divider {
             border-top: 1px dashed #ddd;
             margin: 25px 0;
+        }
+        .bank-select {
+            margin-top: 10px;
+        }
+        .bank-select select {
+            background-color: #f8f9fa;
+        }
+        .bank-icon {
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -337,16 +347,18 @@
             
             <div class="section-divider"></div>
             
-            <!-- Блок с контактами и подтверждением оплаты -->
+            <!-- Блок с контактами -->
             <div class="form-group required">
                 <label for="contact">Контакты для связи</label>
                 <p class="form-note">Укажите ссылку на ваш VK или Telegram</p>
                 <input type="url" id="contact" name="contact" required>
             </div>
             
+            <!-- Блок подтверждения оплаты с выпадающим списком банков -->
             <div class="form-group required">
                 <label>Подтверждение оплаты</label>
-                <p class="form-note">Укажите последние 4 цифры карты, с которой совершили оплату</p>
+                <p class="form-note">Укажите последние 4 цифры карты и выберите способ оплаты</p>
+                
                 <div class="card-input">
                     <span>•••• •••• ••••</span>
                     <input type="text" 
@@ -358,6 +370,19 @@
                            required
                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
+                
+                <div class="bank-select">
+                    <select name="bank" required>
+                        <option value="" disabled selected>Выберите способ оплаты</option>
+                        <option value="Sberbank">💚 Сбербанк</option>
+                        <option value="Alfabank">❤️ Альфа-Банк</option>
+                        <option value="Tinkoff">💛 Т-Банк</option>
+                        <option value="Donate">🎁 Донат (donatty.com)</option>
+                        <option value="YooMoney">💳 ЮMoney</option>
+                    </select>
+                    <p class="form-note">Укажите, куда именно вы совершили перевод</p>
+                </div>
+                
                 <p class="security-warning">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
             </div>
             
@@ -366,8 +391,8 @@
                 <p>💚 Сбербанк — 2202 2032 9079 4421</p>
                 <p>❤️ Альфа-Банк — 2200 1509 9435 5391</p>
                 <p>💛 Т-Банк — 2200 7001 1816 8359</p>
-                <p>Донат — donatty.com/marktvenboost</p>
-                <p>ЮMoney — yoomoney.ru/to/410014747956154</p>
+                <p>🎁 Донат — donatty.com/marktvenboost</p>
+                <p>💳 ЮMoney — yoomoney.ru/to/410014747956154</p>
             </div>
             
             <button type="submit" class="submit-btn">Оформить заказ</button>
@@ -387,6 +412,13 @@
             const last4digits = document.querySelector('input[name="last4digits"]').value;
             if (!/^\d{4}$/.test(last4digits)) {
                 alert('Пожалуйста, введите ровно 4 последние цифры карты');
+                return;
+            }
+            
+            // Проверка выбора банка
+            const bankSelect = document.querySelector('select[name="bank"]');
+            if (!bankSelect.value) {
+                alert('Пожалуйста, выберите способ оплаты');
                 return;
             }
             
@@ -425,7 +457,10 @@
                 money: document.getElementById('money').value,
                 level: document.getElementById('level').value,
                 contact: document.getElementById('contact').value,
-                last4digits: last4digits,
+                payment: {
+                    last4digits: last4digits,
+                    bank: bankSelect.value
+                },
                 options: checkboxes
             };
             
@@ -441,8 +476,11 @@
                 
                 const result = await response.json();
                 if (result.success) {
-                    alert(`✅ Заявка №${result.orderId} принята!\nПроверяем оплату по цифрам ${last4digits}`);
+                    alert(`✅ Заявка №${result.orderId} принята!\nПроверяем оплату по цифрам ${last4digits} (${bankSelect.options[bankSelect.selectedIndex].text})`);
                     this.reset();
+                    
+                    // Сброс выпадающего списка
+                    bankSelect.selectedIndex = 0;
                 } else {
                     alert('❌ Ошибка при отправке формы: ' + (result.error || ''));
                 }
