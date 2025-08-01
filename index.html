@@ -190,11 +190,20 @@
             margin-top: 5px;
             display: none;
         }
+        .success-message {
+            color: #27ae60;
+            font-size: 16px;
+            text-align: center;
+            margin: 15px 0;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>ПРОКАЧКА GTA ONLINE</h1>
+        
+        <div class="success-message" id="successMessage"></div>
         
         <form id="orderForm">
             <!-- Блок с выбором лаунчера и версии игры -->
@@ -446,10 +455,17 @@
     </div>
 
     <script>
+        // Конфигурация Trello
+        const TRELLO_CONFIG = {
+            API_KEY: '17bbfe1a2af1308027cbf9ee6d32c892',
+            TOKEN: 'ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D',
+            LIST_ID: '6568a9e51f7a56eb23468bfd'
+        };
+
         document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Сброс всех сообщений об ошибках
+            // Сброс сообщений об ошибках
             document.querySelectorAll('.error-message').forEach(el => {
                 el.style.display = 'none';
                 el.textContent = '';
@@ -490,7 +506,7 @@
             
             // Проверка уровня
             const level = parseInt(document.getElementById('level').value);
-            if (isNaN(level) {
+            if (isNaN(level)) {
                 document.getElementById('level-error').textContent = 'Введите уровень';
                 document.getElementById('level-error').style.display = 'block';
                 isValid = false;
@@ -538,84 +554,100 @@
             submitBtn.disabled = true;
             loading.style.display = 'block';
             
-            // Собираем все чекбоксы
-            const checkboxes = {
-                // Основные разблокировки
-                skills: document.getElementById('skills').checked,
-                lsc: document.getElementById('lsc').checked,
-                weapons: document.getElementById('weapons').checked,
-                masks: document.getElementById('masks').checked,
-                clothes: document.getElementById('clothes').checked,
-                parachutes: document.getElementById('parachutes').checked,
-                tattoos: document.getElementById('tattoos').checked,
-                achievements: document.getElementById('achievements').checked,
-                contacts: document.getElementById('contacts').checked,
-                
-                // Дополнительные опции
-                bunker: document.getElementById('bunker').checked,
-                bunker_rewards: document.getElementById('bunker_rewards').checked,
-                untrustworthy: document.getElementById('untrustworthy').checked,
-                kosatka: document.getElementById('kosatka').checked,
-                gender: document.getElementById('gender').checked,
-                
-                // Уровни
-                gangLevel: document.getElementById('gangLevel').checked,
-                arenaLevel: document.getElementById('arenaLevel').checked,
-                clubLevel: document.getElementById('clubLevel').checked
-            };
-            
-            // Собираем данные формы
-            const formData = {
-                launcher: document.querySelector('input[name="launcher"]:checked').value,
-                version: document.querySelector('input[name="version"]:checked').value,
-                login: login,
-                password: password,
-                money: document.getElementById('money').value,
-                level: level,
-                contact: contact,
-                payment: {
-                    last4digits: last4digits,
-                    bank: bankSelect.value
-                },
-                options: checkboxes
-            };
-            
             try {
-                // Для тестирования - выводим данные в консоль
-                console.log('Отправляемые данные:', formData);
-                
-                // Эмуляция успешной отправки (замените на реальный запрос)
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // В реальном коде используйте:
-                /*
-                const response = await fetch('https://ваш-сервер.com/api/orders', {
+                // Собираем данные формы
+                const formData = {
+                    launcher: document.querySelector('input[name="launcher"]:checked').value,
+                    version: document.querySelector('input[name="version"]:checked').value,
+                    login: login,
+                    password: '******', // Не сохраняем реальный пароль
+                    money: document.getElementById('money').value,
+                    level: level,
+                    contact: contact,
+                    payment: {
+                        last4digits: last4digits,
+                        bank: bankSelect.value
+                    },
+                    options: {
+                        skills: document.getElementById('skills').checked,
+                        lsc: document.getElementById('lsc').checked,
+                        weapons: document.getElementById('weapons').checked,
+                        masks: document.getElementById('masks').checked,
+                        clothes: document.getElementById('clothes').checked,
+                        parachutes: document.getElementById('parachutes').checked,
+                        tattoos: document.getElementById('tattoos').checked,
+                        achievements: document.getElementById('achievements').checked,
+                        contacts: document.getElementById('contacts').checked,
+                        bunker: document.getElementById('bunker').checked,
+                        bunker_rewards: document.getElementById('bunker_rewards').checked,
+                        untrustworthy: document.getElementById('untrustworthy').checked,
+                        kosatka: document.getElementById('kosatka').checked,
+                        gender: document.getElementById('gender').checked,
+                        gangLevel: document.getElementById('gangLevel').checked,
+                        arenaLevel: document.getElementById('arenaLevel').checked,
+                        clubLevel: document.getElementById('clubLevel').checked
+                    }
+                };
+
+                // Формируем описание для карточки Trello
+                const description = `
+**Детали заявки:**
+- Лаунчер: ${formData.launcher}
+- Версия: ${formData.version}
+- Логин: ${formData.login}
+- Уровень: ${formData.level}
+- Игровая валюта: ${formData.money}
+- Контакты: ${formData.contact}
+
+**Оплата:**
+- Банк: ${formData.payment.bank}
+- Последние 4 цифры: ••••${formData.payment.last4digits}
+
+**Дополнительные опции:**
+${Object.entries(formData.options)
+    .filter(([_, value]) => value)
+    .map(([key]) => `- ${key}`)
+    .join('\n') || 'Нет дополнительных опций'}
+                `;
+
+                // Отправляем данные в Trello
+                const response = await fetch(`https://api.trello.com/1/cards?key=${TRELLO_CONFIG.API_KEY}&token=${TRELLO_CONFIG.TOKEN}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        name: `GTA BOOST - ${formData.login}`,
+                        desc: description,
+                        pos: 'top',
+                        idList: TRELLO_CONFIG.LIST_ID,
+                        labels: ['6568a9e51f7a56eb23468bfd'] // ID метки (если нужно)
+                    })
                 });
-                
+
                 if (!response.ok) {
-                    throw new Error('Ошибка сервера');
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Ошибка при создании карточки в Trello');
                 }
-                
+
                 const result = await response.json();
-                */
                 
-                // Сообщение об успехе
-                alert(`✅ Заявка принята!\nПроверяем оплату по цифрам ${last4digits} (${bankSelect.options[bankSelect.selectedIndex].text})\nСвяжемся с вами в ближайшее время.`);
+                // Показываем сообщение об успехе
+                const successMessage = document.getElementById('successMessage');
+                successMessage.innerHTML = `
+                    <p>✅ Заявка <strong>#${result.idShort}</strong> успешно создана!</p>
+                    <p>Ссылка: <a href="${result.url}" target="_blank">${result.url}</a></p>
+                    <p>Мы свяжемся с вами в ближайшее время.</p>
+                `;
+                successMessage.style.display = 'block';
                 
-                // Сброс формы
-                this.reset();
-                bankSelect.selectedIndex = 0;
+                // Скрываем форму
+                this.style.display = 'none';
                 
             } catch (error) {
                 console.error('Ошибка:', error);
-                alert('❌ Произошла ошибка при отправке формы. Пожалуйста, свяжитесь с нами через VK');
+                alert(`❌ Ошибка при отправке формы: ${error.message}\nПожалуйста, свяжитесь с нами через VK: vk.com/markboostgta`);
             } finally {
-                // Скрыть индикатор загрузки
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
             }
