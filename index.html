@@ -531,7 +531,7 @@
             // Проверка 4 цифр карты
             const last4digits = document.querySelector('input[name="last4digits"]').value;
             if (!/^\d{4}$/.test(last4digits)) {
-                document.getElementById('card-error').textContent = 'Введите 4 последние цифры карты';
+                document.getElementById('card-error').tdocument.getElementById('orderForm').addEventListener('submit',extContent = 'Введите 4 последние цифры карты';
                 document.getElementById('card-error').style.display = 'block';
                 isValid = false;
             }
@@ -555,6 +555,41 @@
             loading.style.display = 'block';
             
             try {
+                    try {
+        const trelloUrl = new URL('https://api.trello.com/1/cards');
+        trelloUrl.searchParams.append('key', TRELLO_CONFIG.API_KEY);
+        trelloUrl.searchParams.append('token', TRELLO_CONFIG.TOKEN);
+        trelloUrl.searchParams.append('name', `GTA BOOST - ${formData.login}`);
+        trelloUrl.searchParams.append('desc', description);
+        trelloUrl.searchParams.append('pos', 'top');
+        trelloUrl.searchParams.append('idList', TRELLO_CONFIG.LIST_ID);
+
+        console.log('Trello URL:', trelloUrl.toString());
+
+        const response = await fetch(trelloUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Trello error: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('Trello response:', result);
+        
+        alert(`✅ Карточка создана: ${result.url}`);
+        this.reset();
+
+    } catch (error) {
+        console.error('Full error:', error);
+        alert(`❌ Ошибка: ${error.message}\nПроверьте консоль (F12) для деталей`);
+    } finally {
+        submitBtn.disabled = false;
+        loading.style.display = 'none';
                 // Собираем данные формы
                 const formData = {
                     launcher: document.querySelector('input[name="launcher"]:checked').value,
