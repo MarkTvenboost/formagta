@@ -644,10 +644,22 @@ ${Object.entries(formData.options)
                 // Скрываем форму
                 this.style.display = 'none';
                 
-            } catch (error) {
-                console.error('Ошибка:', error);
-                alert(`❌ Ошибка при отправке формы: ${error.message}\nПожалуйста, свяжитесь с нами через VK: vk.com/markboostgta`);
-            } finally {
+           catch (error) {
+    console.error('Полная ошибка:', error);
+    let errorMessage = 'Неизвестная ошибка';
+    
+    try {
+        // Пытаемся прочитать текст ошибки
+        const errorText = await error.response?.text();
+        if (errorText) {
+            errorMessage = errorText;
+        }
+    } catch (e) {
+        errorMessage = error.message;
+    }
+    
+    alert(`❌ Ошибка при отправке формы: ${errorMessage}\nПожалуйста, свяжитесь с нами через VK: vk.com/markboostgta`);
+} finally {
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
             }
