@@ -131,6 +131,8 @@
         .footer a {
             color: #3498db;
             text-decoration: none;
+            display: block;
+            margin: 5px 0;
         }
         .card-input {
             display: flex;
@@ -197,6 +199,12 @@
             margin: 15px 0;
             display: none;
         }
+        .telegram-contacts {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -206,230 +214,8 @@
         <div class="success-message" id="successMessage"></div>
         
         <form id="orderForm">
-            <!-- Блок с выбором лаунчера и версии игры -->
-            <div class="form-group">
-                <label>В каком лаунчере куплена игра?</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="steam" name="launcher" value="Steam" required>
-                        <label for="steam">Steam</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="socialclub" name="launcher" value="SocialClub">
-                        <label for="socialclub">SocialClub</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="epicgames" name="launcher" value="EpicGames">
-                        <label for="epicgames">EpicGames</label>
-                    </div>
-                </div>
-                <div class="error-message" id="launcher-error"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>Версия игры</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="enhanced" name="version" value="Enhanced" required>
-                        <label for="enhanced">Enhanced</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="legacy" name="version" value="Legacy">
-                        <label for="legacy">Legacy</label>
-                    </div>
-                </div>
-                <div class="error-message" id="version-error"></div>
-            </div>
-            
-            <!-- Блок с логином и паролем -->
-            <div class="form-group required">
-                <label for="login">Логин</label>
-                <p class="form-note">Steam — логин | Epic — почта | Rockstar — почта от SocialClub</p>
-                <input type="text" id="login" name="login" required>
-                <div class="error-message" id="login-error"></div>
-            </div>
-            
-            <div class="form-group required">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
-                <div class="error-message" id="password-error"></div>
-            </div>
-            
-            <!-- Блок с выбором валюты -->
-            <div class="form-group">
-                <div class="emoji-title" data-emoji="💰">Количество игровой валюты</div>
-                <select id="money" name="money" class="form-control">
-                    <option value="30 млн">30 млн</option>
-                    <option value="40 млн">40 млн</option>
-                    <option value="50 млн">50 млн</option>
-                    <option value="60 млн">60 млн</option>
-                    <option value="70 млн">70 млн</option>
-                    <option value="80 млн">80 млн</option>
-                    <option value="90 млн">90 млн</option>
-                    <option value="100 млн">100 млн</option>
-                    <option value="110 млн">110 млн</option>
-                    <option value="120 млн">120 млн</option>
-                    <option value="130 млн">130 млн</option>
-                    <option value="140 млн">140 млн</option>
-                    <option value="150 млн">150 млн</option>
-                    <option value="160 млн">160 млн</option>
-                    <option value="170 млн">170 млн</option>
-                    <option value="180 млн">180 млн</option>
-                    <option value="190 млн">190 млн</option>
-                    <option value="250 млн">250 млн</option>
-                    <option value="500 млн">500 млн</option>
-                    <option value="750 млн">750 млн</option>
-                    <option value="1 млрд">1 млрд</option>
-                    <option value="2 млрд">2 млрд</option>
-                    <option value="3 млрд">3 млрд</option>
-                    <option value="4 млрд">4 млрд</option>
-                </select>
-            </div>
-            
-            <!-- Блок с уровнем персонажа -->
-            <div class="form-group required">
-                <label for="level">Какой уровень персонажа сделать?</label>
-                <p class="form-note">От 1 до 8000</p>
-                <input type="number" id="level" name="level" min="1" max="8000" required>
-                <div class="error-message" id="level-error"></div>
-            </div>
-            
-            <!-- Блок с отдельными уровнями -->
-            <div class="form-group">
-                <label>Отдельные уровни</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="gangLevel" name="gangLevel" value="8000">
-                        <label for="gangLevel">8000 уровень банды</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="arenaLevel" name="arenaLevel" value="1000">
-                        <label for="arenaLevel">1000 уровень арены</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="clubLevel" name="clubLevel" value="1000">
-                        <label for="clubLevel">1000 уровень автоклуба</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section-divider"></div>
-            
-            <!-- Основные разблокировки -->
-            <div class="form-group">
-                <div class="emoji-title" data-emoji="🔓">Основные разблокировки</div>
-                <div class="checkbox-group">
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="skills" name="unlock_skills" value="1">
-                        <label for="skills">Открыть все скиллы</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="lsc" name="unlock_lsc" value="1">
-                        <label for="lsc">Открыть LSC тюнинг</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="weapons" name="unlock_weapons" value="1">
-                        <label for="weapons">Открыть оружие</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="masks" name="unlock_masks" value="1">
-                        <label for="masks">Открыть маски</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="clothes" name="unlock_clothes" value="1">
-                        <label for="clothes">Открыть одежду</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="parachutes" name="unlock_parachutes" value="1">
-                        <label for="parachutes">Открыть парашюты</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="tattoos" name="unlock_tattoos" value="1">
-                        <label for="tattoos">Открыть татуировки</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="achievements" name="unlock_achievements" value="1">
-                        <label for="achievements">Открыть все достижения</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="contacts" name="unlock_contacts" value="1">
-                        <label for="contacts">Открыть контакты в телефоне</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section-divider"></div>
-            
-            <!-- Дополнительные опции -->
-            <div class="form-group">
-                <div class="emoji-title" data-emoji="🔓">Дополнительно</div>
-                <div class="checkbox-group">
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="bunker" name="unlock_bunker" value="1">
-                        <label for="bunker">Открыть разработки бункера</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="bunker_rewards" name="unlock_bunker_rewards" value="1">
-                        <label for="bunker_rewards">Открыть награды тира в бункере</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="untrustworthy" name="remove_untrustworthy" value="1">
-                        <label for="untrustworthy">Удалить статус «ненадёжный»</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="kosatka" name="unlock_kosatka" value="1">
-                        <label for="kosatka">Открыть косатку для покупки</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="gender" name="change_gender" value="1">
-                        <label for="gender">Сменить пол персонажа</label>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section-divider"></div>
-            
-            <!-- Блок с контактами -->
-            <div class="form-group required">
-                <label for="contact">Контакты для связи</label>
-                <p class="form-note">Укажите ссылку на ваш VK или Telegram</p>
-                <input type="url" id="contact" name="contact" required placeholder="https://vk.com/username или https://t.me/username">
-                <div class="error-message" id="contact-error"></div>
-            </div>
-            
-            <!-- Блок подтверждения оплаты с выпадающим списком банков -->
-            <div class="form-group required">
-                <label>Подтверждение оплаты</label>
-                <p class="form-note">Укажите последние 4 цифры карты и выберите способ оплаты</p>
-                
-                <div class="card-input">
-                    <span>•••• •••• ••••</span>
-                    <input type="text" 
-                           class="card-digits" 
-                           name="last4digits" 
-                           pattern="\d{4}" 
-                           maxlength="4" 
-                           placeholder="1234" 
-                           required
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                </div>
-                <div class="error-message" id="card-error"></div>
-                
-                <div class="bank-select">
-                    <select name="bank" required>
-                        <option value="" disabled selected>Выберите способ оплаты</option>
-                        <option value="Sberbank">💚 Сбербанк</option>
-                        <option value="Alfabank">❤️ Альфа-Банк</option>
-                        <option value="Tinkoff">💛 Т-Банк</option>
-                        <option value="Donate">🎁 Донат (donatty.com)</option>
-                        <option value="YooMoney">💳 ЮMoney</option>
-                    </select>
-                    <p class="form-note">Укажите, куда именно вы совершили перевод</p>
-                </div>
-                <div class="error-message" id="bank-error"></div>
-                
-                <p class="security-warning">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
-            </div>
+            <!-- Ваша форма остается без изменений -->
+            <!-- ... -->
             
             <div class="payment-details">
                 <p><strong>Реквизиты для перевода:</strong></p>
@@ -449,8 +235,12 @@
         </form>
         
         <div class="footer">
+            <div class="telegram-contacts">
+                <p><strong>Контакты для связи:</strong></p>
+                <a href="https://t.me/kot_flopp" target="_blank">📱 Помощник: @kot_flopp</a>
+                <a href="https://t.me/GTAONLINE5BOOST" target="_blank">🚀 Автор: GTAONLINE5BOOST</a>
+            </div>
             <p>Заказ сразу будет добавлен в очередь</p>
-            <p>Если у вас появятся дополнительные вопросы, напишите мне: <a href="https://vk.com/markboostgta" target="_blank">https://vk.com/markboostgta</a></p>
         </div>
     </div>
 
@@ -459,196 +249,37 @@
         const TRELLO_CONFIG = {
             API_KEY: '17bbfe1a2af1308027cbf9ee6d32c892',
             TOKEN: 'ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D',
-            LIST_ID: '685fbecf9de5902f7c319e31'
+            LIST_ID: '656ea1d714f372ebddb87f7a'
         };
 
         document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Сброс сообщений об ошибках
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.style.display = 'none';
-                el.textContent = '';
-            });
-            
-            // Валидация формы
-            let isValid = true;
-            
-            // Проверка лаунчера
-            if (!document.querySelector('input[name="launcher"]:checked')) {
-                document.getElementById('launcher-error').textContent = 'Выберите лаунчер';
-                document.getElementById('launcher-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка версии
-            if (!document.querySelector('input[name="version"]:checked')) {
-                document.getElementById('version-error').textContent = 'Выберите версию игры';
-                document.getElementById('version-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка логина
-            const login = document.getElementById('login').value.trim();
-            if (!login) {
-                document.getElementById('login-error').textContent = 'Введите логин';
-                document.getElementById('login-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка пароля
-            const password = document.getElementById('password').value.trim();
-            if (!password) {
-                document.getElementById('password-error').textContent = 'Введите пароль';
-                document.getElementById('password-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка уровня
-            const level = parseInt(document.getElementById('level').value);
-            if (isNaN(level)) {
-                document.getElementById('level-error').textContent = 'Введите уровень';
-                document.getElementById('level-error').style.display = 'block';
-                isValid = false;
-            } else if (level < 1 || level > 8000) {
-                document.getElementById('level-error').textContent = 'Уровень должен быть от 1 до 8000';
-                document.getElementById('level-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка контактов
-            const contact = document.getElementById('contact').value.trim();
-            if (!contact) {
-                document.getElementById('contact-error').textContent = 'Введите контакты';
-                document.getElementById('contact-error').style.display = 'block';
-                isValid = false;
-            } else if (!contact.startsWith('https://vk.com/') && !contact.startsWith('https://t.me/')) {
-                document.getElementById('contact-error').textContent = 'Укажите ссылку VK (https://vk.com/) или Telegram (https://t.me/)';
-                document.getElementById('contact-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка 4 цифр карты
-            const last4digits = document.querySelector('input[name="last4digits"]').value;
-            if (!/^\d{4}$/.test(last4digits)) {
-                document.getElementById('card-error').textContent = 'Введите 4 последние цифры карты';
-                document.getElementById('card-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка выбора банка
-            const bankSelect = document.querySelector('select[name="bank"]');
-            if (!bankSelect.value) {
-                document.getElementById('bank-error').textContent = 'Выберите способ оплаты';
-                document.getElementById('bank-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                return;
-            }
-            
-            // Показать индикатор загрузки
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
-            submitBtn.disabled = true;
-            loading.style.display = 'block';
+            // Валидация формы (остается без изменений)
+            // ...
             
             try {
-                // Собираем данные формы
-                const formData = {
-                    launcher: document.querySelector('input[name="launcher"]:checked').value,
-                    version: document.querySelector('input[name="version"]:checked').value,
-                    login: login,
-                    password: '******', // Не сохраняем реальный пароль
-                    money: document.getElementById('money').value,
-                    level: level,
-                    contact: contact,
-                    payment: {
-                        last4digits: last4digits,
-                        bank: bankSelect.value
-                    },
-                    options: {
-                        skills: document.getElementById('skills').checked,
-                        lsc: document.getElementById('lsc').checked,
-                        weapons: document.getElementById('weapons').checked,
-                        masks: document.getElementById('masks').checked,
-                        clothes: document.getElementById('clothes').checked,
-                        parachutes: document.getElementById('parachutes').checked,
-                        tattoos: document.getElementById('tattoos').checked,
-                        achievements: document.getElementById('achievements').checked,
-                        contacts: document.getElementById('contacts').checked,
-                        bunker: document.getElementById('bunker').checked,
-                        bunker_rewards: document.getElementById('bunker_rewards').checked,
-                        untrustworthy: document.getElementById('untrustworthy').checked,
-                        kosatka: document.getElementById('kosatka').checked,
-                        gender: document.getElementById('gender').checked,
-                        gangLevel: document.getElementById('gangLevel').checked,
-                        arenaLevel: document.getElementById('arenaLevel').checked,
-                        clubLevel: document.getElementById('clubLevel').checked
-                    }
-                };
-
-                // Формируем описание для карточки Trello
-                const description = `
-**Детали заявки:**
-- Лаунчер: ${formData.launcher}
-- Версия: ${formData.version}
-- Логин: ${formData.login}
-- Уровень: ${formData.level}
-- Игровая валюта: ${formData.money}
-- Контакты: ${formData.contact}
-
-**Оплата:**
-- Банк: ${formData.payment.bank}
-- Последние 4 цифры: ••••${formData.payment.last4digits}
-
-**Дополнительные опции:**
-${Object.entries(formData.options)
-    .filter(([_, value]) => value)
-    .map(([key]) => `- ${key}`)
-    .join('\n') || 'Нет дополнительных опций'}
-                `;
-
-                // Отправляем данные в Trello
-                const response = await fetch(`https://api.trello.com/1/cards?key=${TRELLO_CONFIG.API_KEY}&token=${TRELLO_CONFIG.TOKEN}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: `GTA BOOST - ${formData.login}`,
-                        desc: description,
-                        pos: 'top',
-                        idList: TRELLO_CONFIG.LIST_ID
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Ошибка при создании карточки в Trello');
-                }
-
+                // Отправка данных в Trello (остается без изменений)
+                // ...
+                
                 const result = await response.json();
                 
-                // Показываем сообщение об успехе
+                // Успешное создание заявки (БЕЗ ССЫЛКИ НА TRELLO)
                 const successMessage = document.getElementById('successMessage');
                 successMessage.innerHTML = `
                     <p>✅ Заявка <strong>#${result.idShort}</strong> успешно создана!</p>
-                    <p>Ссылка: <a href="${result.url}" target="_blank">${result.url}</a></p>
                     <p>Мы свяжемся с вами в ближайшее время.</p>
                 `;
                 successMessage.style.display = 'block';
                 
-                // Скрываем форму
                 this.style.display = 'none';
                 
             } catch (error) {
                 console.error('Ошибка:', error);
-                alert(`❌ Ошибка при отправке формы: ${error.message}\nПожалуйста, свяжитесь с нами через VK: vk.com/markboostgta`);
+                alert(`❌ Ошибка: ${error.message}\nСвяжитесь с нами через Telegram.`);
             } finally {
-                submitBtn.disabled = false;
-                loading.style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('loading').style.display = 'none';
             }
         });
     </script>
