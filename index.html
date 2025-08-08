@@ -1,828 +1,452 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ПРОКАЧКА GTA ONLINE</title>
-    <style>
-        /* Основные стили */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 28px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
+import React, { useMemo, useRef, useState } from "react";
 
-        /* Стили для виджета активности */
-        .activity-feed {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 0 0 25px 0;
-            border-left: 4px solid #f39c12;
-            font-size: 14px;
-            animation: fadeIn 1s ease-in-out;
-        }
-        .activity-item {
-            margin: 8px 0;
-            padding: 8px 10px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            line-height: 1.4;
-        }
-        .activity-item::before {
-            content: "🔔";
-            margin-right: 10px;
-            font-size: 16px;
-        }
-        .activity-item.highlight {
-            animation: highlight 2s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes highlight {
-            0% { background: rgba(255,165,0,0.3); }
-            100% { background: rgba(255,255,255,0.1); }
-        }
+/**
+ * ПРОКАЧКА GTA ONLINE — Форма заявки (без прокси)
+ * - Все поля по ТЗ
+ * - Подтверждение оплаты: последние 4 цифры + способ оплаты
+ * - Чекбоксы/радио, валидации, хонипот
+ * - Прямая интеграция с Trello (карточка + чек-лист)
+ */
 
-        /* Стили формы */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        .form-group.required label:after {
-            content: " *";
-            color: red;
-        }
-        .form-note {
-            font-size: 12px;
-            color: #666;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-        .radio-group {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .radio-option {
-            display: flex;
-            align-items: center;
-        }
-        input[type="text"],
-        input[type="password"],
-        input[type="number"],
-        input[type="url"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .checkbox-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .checkbox-option input {
-            margin-right: 8px;
-        }
-        .submit-btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .submit-btn:hover {
-            background-color: #2980b9;
-        }
-        .submit-btn:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
-        .payment-details {
-            text-align: center;
-            margin: 25px 0;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            border-left: 4px solid #3498db;
-        }
-        .payment-details p {
-            margin: 5px 0;
-        }
-        .emoji-title {
-            font-size: 18px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        .emoji-title:before {
-            content: attr(data-emoji);
-            margin-right: 8px;
-            font-size: 20px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 14px;
-            color: #666;
-        }
-        .footer a {
-            color: #3498db;
-            text-decoration: none;
-            display: block;
-            margin: 5px 0;
-        }
-        .card-input {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .card-input span {
-            margin-right: 5px;
-            font-size: 18px;
-        }
-        input[type="text"].card-digits {
-            width: 80px;
-            padding: 10px;
-            font-size: 16px;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-        .security-warning {
-            font-size: 11px;
-            color: #e74c3c;
-            margin-top: 5px;
-        }
-        .section-divider {
-            border-top: 1px dashed #ddd;
-            margin: 25px 0;
-        }
-        .bank-select {
-            margin-top: 10px;
-        }
-        .bank-select select {
-            background-color: #f8f9fa;
-        }
-        .bank-icon {
-            margin-right: 8px;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        .success-message {
-            color: #27ae60;
-            font-size: 16px;
-            text-align: center;
-            margin: 15px 0;
-            display: none;
-            animation: confetti 0.5s ease-out;
-            position: relative;
-        }
-        @keyframes confetti {
-            0% { transform: translateY(-50px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        .success-message::after {
-            content: "✓";
-            color: #27ae60;
-            font-size: 50px;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.2;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            margin: 15px 0;
-            display: none;
-        }
-        .progress {
-            height: 100%;
-            width: 0%;
-            background-color: #3498db;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        .countdown-timer {
-            background-color: #e74c3c;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin: 0 0 20px 0;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        .telegram-contacts {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f8ff;
-            border-radius: 8px;
-            border-left: 4px solid #0088cc;
-        }
-        .telegram-contacts a {
-            display: block;
-            margin: 10px 0;
-            color: #0088cc;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- Таймер обратного отсчета -->
-        <div class="countdown-timer" id="countdown">
-            🔥 До конца акции осталось: <span id="timer">24:00:00</span>
-        </div>
+// ===== Trello (FRONTEND! видны в браузере) =====
+const TRELLO_KEY = "17bbfe1a2af1308027cbf9ee6d32c892";      // ← твой Trello API key
+const TRELLO_TOKEN = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";    // ← твой Trello token
+const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";  // ← id списка, куда складывать заявки
 
-        <h1>ПРОКАЧКА GTA ONLINE</h1>
-        
-        <!-- Виджет активности -->
-        <div class="activity-feed" id="activityFeed">
-            <div class="activity-item highlight">Игрок ***824 только что получил 100M GTA$</div>
-            <div class="activity-item">***591 достиг 8000 уровня</div>
-            <div class="activity-item">Заказ #1678 выполнен за 47 минут</div>
-        </div>
-        
-        <div class="success-message" id="successMessage"></div>
-        
-        <form id="orderForm">
-            <!-- Блок с выбором лаунчера и версии игры -->
-            <div class="form-group">
-                <label>В каком лаунчере куплена игра?</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="steam" name="launcher" value="Steam" required>
-                        <label for="steam">Steam</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="socialclub" name="launcher" value="SocialClub">
-                        <label for="socialclub">SocialClub</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="epicgames" name="launcher" value="EpicGames">
-                        <label for="epicgames">EpicGames</label>
-                    </div>
-                </div>
-                <div class="error-message" id="launcher-error"></div>
+const LAUNCHERS = [
+  { value: "Steam", label: "Steam" },
+  { value: "SocialClub", label: "SocialClub" },
+  { value: "EpicGames", label: "EpicGames" },
+];
+
+const GAME_VERSIONS = [
+  { value: "Enhanced", label: "Enhanced" },
+  { value: "Legacy", label: "Legacy" },
+];
+
+const MONEY_OPTIONS = [
+  "30 млн","40 млн","50 млн","60 млн","70 млн","80 млн","90 млн","100 млн",
+  "110 млн","120 млн","130 млн","140 млн","150 млн","160 млн","170 млн",
+  "180 млн","190 млн","250 млн","500 млн","750 млн","1 млрд","2 млрд",
+  "3 млрд","4 млрд"
+];
+
+const EXTRA_LEVELS = [
+  "8000 уровень банды",
+  "1000 уровень арены",
+  "1000 уровень автоклуба",
+];
+
+const UNLOCKS_MAIN = [
+  "Открыть все скиллы",
+  "Открыть LSC тюнинг",
+  "Открыть оружие",
+  "Открыть маски",
+  "Открыть одежду",
+  "Открыть парашюты",
+  "Открыть татуировки",
+  "Открыть все достижения",
+  "Открыть контакты в телефоне",
+];
+
+const UNLOCKS_EXTRA = [
+  "Открыть разработки бункера",
+  "Открыть награды тира в бункере",
+  "Удалить статус «ненадёжный»",
+  "Открыть косатку для покупки",
+  "Сменить пол персонажа",
+];
+
+const Req = () => <span className="text-red-500">*</span>;
+
+export default function GTAOrderForm() {
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  // Поля
+  const [launcher, setLauncher] = useState(LAUNCHERS[0].value);
+  const [version, setVersion]   = useState(GAME_VERSIONS[0].value);
+  const [login, setLogin]       = useState("");
+  const [password, setPassword] = useState("");
+  const [money, setMoney]       = useState<string | null>(null);
+  const [level, setLevel]       = useState("");
+  const [extraLevels, setExtraLevels] = useState<string[]>([]);
+  const [mainUnlocks, setMainUnlocks] = useState<string[]>([]);
+  const [extraUnlocks, setExtraUnlocks] = useState<string[]>([]);
+  const [contacts, setContacts] = useState("");
+
+  // Оплата
+  const [paymentLast4, setPaymentLast4] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+
+  // Honeypot
+  const [website, setWebsite] = useState("");
+
+  // UI
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Валидации
+  const levelIsValid = useMemo(() => {
+    if (!level) return false;
+    const n = Number(level);
+    return Number.isInteger(n) && n >= 1 && n <= 8000;
+  }, [level]);
+
+  const last4IsValid = useMemo(() => /^\d{4}$/.test(paymentLast4), [paymentLast4]);
+
+  const canSubmit = useMemo(() => (
+    launcher &&
+    version &&
+    login.trim().length > 0 &&
+    password.trim().length > 0 &&
+    levelIsValid &&
+    contacts.trim().length > 0 &&
+    money !== null &&
+    last4IsValid &&
+    !!paymentMethod &&
+    website === ""
+  ), [launcher, version, login, password, levelIsValid, contacts, money, last4IsValid, paymentMethod, website]);
+
+  function toggleInArray(value: string, list: string[], setter: (v: string[]) => void) {
+    setter(list.includes(value) ? list.filter((x) => x !== value) : [...list, value]);
+  }
+
+  // ===== Trello helpers (без прокси) =====
+  async function trelloPOST(url: string, params: Record<string, string>) {
+    const u = new URL(url);
+    u.searchParams.set("key", TRELLO_KEY);
+    u.searchParams.set("token", TRELLO_TOKEN);
+    Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+    const res = await fetch(u.toString(), { method: "POST" });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Trello error: ${txt}`);
+    }
+    return res.json();
+  }
+
+  async function createTrelloCard() {
+    const title = `ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`;
+    const descLines = [
+      `Лаунчер: ${launcher}`,
+      `Версия: ${version}`,
+      `Логин: ${login}`,
+      `Пароль: ${"*".repeat(Math.min(password.length, 12))} (скрыто)`,
+      `Игровая валюта: ${money ?? "не выбрано"}`,
+      `Уровень персонажа: ${level}`,
+      `Отдельные уровни: ${extraLevels.length ? extraLevels.join(", ") : "—"}`,
+      `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
+      `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
+      `Подтверждение оплаты: **** ${paymentLast4}`,
+      `Способ оплаты: ${paymentMethod}`,
+      `Контакты: ${contacts}`,
+      `Источник: форма заявки`,
+    ];
+
+    // 1) карточка
+    const card = await trelloPOST("https://api.trello.com/1/cards", {
+      idList: TRELLO_LIST_ID,
+      name: title,
+      desc: descLines.join("\n"),
+    });
+
+    // 2) чек-лист
+    const checklist = await trelloPOST(`https://api.trello.com/1/cards/${card.id}/checklists`, {
+      name: "Ответы заявки",
+    });
+
+    // 3) пункты чек-листа (пронумерованные)
+    let idx = 1;
+    const items = [
+      `Лаунчер: ${launcher}`,
+      `Версия: ${version}`,
+      `Логин: ${login}`,
+      `Пароль: ${password ? "(получен)" : "—"}`,
+      `Игровая валюта: ${money ?? "—"}`,
+      `Уровень: ${level}`,
+      `Отдельные уровни: ${extraLevels.length ? extraLevels.join(", ") : "—"}`,
+      `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
+      `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
+      `Подтверждение оплаты: **** ${paymentLast4}`,
+      `Способ оплаты: ${paymentMethod}`,
+      `Контакты: ${contacts}`,
+    ].map(t => `${idx++}. ${t}`);
+
+    for (const text of items) {
+      await trelloPOST(`https://api.trello.com/1/checklists/${checklist.id}/checkItems`, {
+        name: text,
+      });
+    }
+
+    return card; // вернём для idShort
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null); setSuccess(null);
+
+    if (!canSubmit) {
+      setError("Проверьте обязательные поля");
+      return;
+    }
+    if (!TRELLO_KEY || !TRELLO_TOKEN || !TRELLO_LIST_ID) {
+      setError("Заполните TRELLO_KEY / TRELLO_TOKEN / TRELLO_LIST_ID.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const card = await createTrelloCard();
+      setSuccess(`Заявка отправлена! Номер карточки: ${card.idShort ?? card.id}`);
+      formRef.current?.reset();
+      // сброс стейта
+      setLauncher(LAUNCHERS[0].value);
+      setVersion(GAME_VERSIONS[0].value);
+      setLogin(""); setPassword("");
+      setMoney(null); setLevel("");
+      setExtraLevels([]); setMainUnlocks([]); setExtraUnlocks([]);
+      setContacts("");
+      setPaymentLast4(""); setPaymentMethod("");
+      setWebsite("");
+    } catch (err: any) {
+      setError(err?.message || "Ошибка при отправке");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white py-10 px-4">
+      <div className="max-w-3xl mx-auto">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">ПРОКАЧКА GTA ONLINE</h1>
+          <p className="mt-2 text-slate-300">Заполните форму — заказ сразу будет добавлен в очередь.</p>
+        </header>
+
+        <form ref={formRef} onSubmit={onSubmit} className="space-y-8">
+          {/* Лаунчер */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-3">В каком лаунчере куплена игра?</h2>
+            <div className="flex flex-wrap gap-3">
+              {LAUNCHERS.map((opt) => (
+                <label key={opt.value} className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${launcher === opt.value ? "border-emerald-400 bg-emerald-500/10" : "border-slate-600"}`}>
+                  <input type="radio" name="launcher" className="sr-only" checked={launcher === opt.value} onChange={() => setLauncher(opt.value)} />
+                  <span className="font-medium">{opt.label}</span>
+                </label>
+              ))}
             </div>
-            
-            <div class="form-group">
-                <label>Версия игры</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="enhanced" name="version" value="Enhanced" required>
-                        <label for="enhanced">Enhanced</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="legacy" name="version" value="Legacy">
-                        <label for="legacy">Legacy</label>
-                    </div>
-                </div>
-                <div class="error-message" id="version-error"></div>
+          </section>
+
+          {/* Версия */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-3">Выберите версию игры</h2>
+            <div className="flex flex-wrap gap-3">
+              {GAME_VERSIONS.map((opt) => (
+                <label key={opt.value} className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border ${version === opt.value ? "border-emerald-400 bg-emerald-500/10" : "border-slate-600"}`}>
+                  <input type="radio" name="gameVersion" className="sr-only" checked={version === opt.value} onChange={() => setVersion(opt.value)} />
+                  <span className="font-medium">{opt.label}</span>
+                </label>
+              ))}
             </div>
-            
-            <!-- Блок с логином и паролем -->
-            <div class="form-group required">
-                <label for="login">Логин</label>
-                <p class="form-note">Steam — логин | Epic — почта | Rockstar — почта от SocialClub</p>
-                <input type="text" id="login" name="login" required>
-                <div class="error-message" id="login-error"></div>
+          </section>
+
+          {/* Данные входа */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-4">Данные входа</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Логин <Req /></label>
+                <input
+                  type="text"
+                  className="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-2 outline-none focus:border-emerald-400"
+                  placeholder="Введите логин"
+                  onChange={(e) => setLogin(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Steam — логин | Epic — почта | Rockstar — почта от SocialClub
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Пароль <Req /></label>
+                <input
+                  type="password"
+                  className="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-2 outline-none focus:border-emerald-400"
+                  placeholder="Введите пароль"
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-            
-            <div class="form-group required">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" required>
-                <div class="error-message" id="password-error"></div>
+          </section>
+
+          {/* Валюта */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-3">💰 Количество игровой валюты</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {MONEY_OPTIONS.map((opt) => (
+                <label key={opt} className={`cursor-pointer rounded-xl border px-4 py-2 text-sm text-center ${money === opt ? "border-emerald-400 bg-emerald-500/10" : "border-slate-600"}`}>
+                  <input type="radio" name="money" className="sr-only" checked={money === opt} onChange={() => setMoney(opt)} />
+                  {opt}
+                </label>
+              ))}
             </div>
-            
-            <!-- Блок с выбором валюты -->
-            <div class="form-group">
-                <div class="emoji-title" data-emoji="💰">Количество игровой валюты</div>
-                <select id="money" name="money" class="form-control">
-                    <option value="30 млн">30 млн</option>
-                    <option value="40 млн">40 млн</option>
-                    <option value="50 млн">50 млн</option>
-                    <option value="60 млн">60 млн</option>
-                    <option value="70 млн">70 млн</option>
-                    <option value="80 млн">80 млн</option>
-                    <option value="90 млн">90 млн</option>
-                    <option value="100 млн">100 млн</option>
-                    <option value="110 млн">110 млн</option>
-                    <option value="120 млн">120 млн</option>
-                    <option value="130 млн">130 млн</option>
-                    <option value="140 млн">140 млн</option>
-                    <option value="150 млн">150 млн</option>
-                    <option value="160 млн">160 млн</option>
-                    <option value="170 млн">170 млн</option>
-                    <option value="180 млн">180 млн</option>
-                    <option value="190 млн">190 млн</option>
-                    <option value="250 млн">250 млн</option>
-                    <option value="500 млн">500 млн</option>
-                    <option value="750 млн">750 млн</option>
-                    <option value="1 млрд">1 млрд</option>
-                    <option value="2 млрд">2 млрд</option>
-                    <option value="3 млрд">3 млрд</option>
-                    <option value="4 млрд">4 млрд</option>
-                </select>
+          </section>
+
+          {/* Уровень */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <label className="block text-sm font-medium mb-1">Какой уровень персонажа сделать? <Req /></label>
+            <input
+              type="number" min={1} max={8000}
+              className={`w-full rounded-xl bg-slate-900/60 border px-4 py-2 outline-none focus:border-emerald-400 ${level && !levelIsValid ? "border-red-500" : "border-slate-700"}`}
+              placeholder="Например: 500"
+              onChange={(e) => setLevel(e.target.value)}
+              required
+            />
+            <div className="flex items-baseline gap-3">
+              <p className="text-xs text-slate-400 mt-1">от 1 до 8000</p>
+              {!levelIsValid && level !== "" && <p className="text-xs text-red-400 mt-1">Укажите целое число 1–8000</p>}
             </div>
-            
-            <!-- Блок с уровнем персонажа -->
-            <div class="form-group required">
-                <label for="level">Какой уровень персонажа сделать?</label>
-                <p class="form-note">От 1 до 8000</p>
-                <input type="number" id="level" name="level" min="1" max="8000" required>
-                <div class="error-message" id="level-error"></div>
+          </section>
+
+          {/* Отдельные уровни */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-3">Отдельные уровни</h2>
+            <div className="space-y-2">
+              {EXTRA_LEVELS.map((label) => (
+                <label key={label} className="flex items-center gap-3">
+                  <input type="checkbox" className="h-4 w-4 accent-emerald-500"
+                    checked={extraLevels.includes(label)}
+                    onChange={() => toggleInArray(label, extraLevels, setExtraLevels)} />
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
-            
-            <!-- Блок с отдельными уровнями -->
-            <div class="form-group">
-                <label>Отдельные уровни</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="gangLevel" name="gangLevel" value="8000">
-                        <label for="gangLevel">8000 уровень банды</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="arenaLevel" name="arenaLevel" value="1000">
-                        <label for="arenaLevel">1000 уровень арены</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="clubLevel" name="clubLevel" value="1000">
-                        <label for="clubLevel">1000 уровень автоклуба</label>
-                    </div>
-                </div>
+          </section>
+
+          {/* Основные разблокировки */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-3">🔓 Основные разблокировки</h2>
+            <div className="space-y-2">
+              {UNLOCKS_MAIN.map((label) => (
+                <label key={label} className="flex items-center gap-3">
+                  <input type="checkbox" className="h-4 w-4 accent-emerald-500"
+                    checked={mainUnlocks.includes(label)}
+                    onChange={() => toggleInArray(label, mainUnlocks, setMainUnlocks)} />
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
-            
-            <div class="section-divider"></div>
-            
-            <!-- Основные разблокировки -->
-            <div class="form-group">
-                <div class="emoji-title" data-emoji="🔓">Основные разблокировки</div>
-                <div class="checkbox-group">
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="skills" name="unlock_skills" value="1">
-                        <label for="skills">Открыть все скиллы</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="lsc" name="unlock_lsc" value="1">
-                        <label for="lsc">Открыть LSC тюнинг</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="weapons" name="unlock_weapons" value="1">
-                        <label for="weapons">Открыть оружие</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="masks" name="unlock_masks" value="1">
-                        <label for="masks">Открыть маски</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="clothes" name="unlock_clothes" value="1">
-                        <label for="clothes">Открыть одежду</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="parachutes" name="unlock_parachutes" value="1">
-                        <label for="parachutes">Открыть парашюты</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="tattoos" name="unlock_tattoos" value="1">
-                        <label for="tattoos">Открыть татуировки</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="achievements" name="unlock_achievements" value="1">
-                        <label for="achievements">Открыть все достижения</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="contacts" name="unlock_contacts" value="1">
-                        <label for="contacts">Открыть контакты в телефоне</label>
-                    </div>
-                </div>
+          </section>
+
+          {/* Дополнительно */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <h2 className="text-lg font-semibold mb-3">🔓 Дополнительно</h2>
+            <div className="space-y-2">
+              {UNLOCKS_EXTRA.map((label) => (
+                <label key={label} className="flex items-center gap-3">
+                  <input type="checkbox" className="h-4 w-4 accent-emerald-500"
+                    checked={extraUnlocks.includes(label)}
+                    onChange={() => toggleInArray(label, extraUnlocks, setExtraUnlocks)} />
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
-            
-            <div class="section-divider"></div>
-            
-            <!-- Дополнительные опции -->
-            <div class="form-group">
-                <div class="emoji-title" data-emoji="🔓">Дополнительно</div>
-                <div class="checkbox-group">
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="bunker" name="unlock_bunker" value="1">
-                        <label for="bunker">Открыть разработки бункера</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="bunker_rewards" name="unlock_bunker_rewards" value="1">
-                        <label for="bunker_rewards">Открыть награды тира в бункере</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="untrustworthy" name="remove_untrustworthy" value="1">
-                        <label for="untrustworthy">Удалить статус «ненадёжный»</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="kosatka" name="unlock_kosatka" value="1">
-                        <label for="kosatka">Открыть косатку для покупки</label>
-                    </div>
-                    <div class="checkbox-option">
-                        <input type="checkbox" id="gender" name="change_gender" value="1">
-                        <label for="gender">Сменить пол персонажа</label>
-                    </div>
-                </div>
+          </section>
+
+          {/* Контакты */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <label className="block text-sm font-medium mb-1">Контакты для связи <Req /></label>
+            <input
+              type="text"
+              className="w-full rounded-xl bg-slate-900/60 border border-slate-700 px-4 py-2 outline-none focus:border-emerald-400"
+              placeholder="Укажите ссылку на ваш VK или Telegram"
+              onChange={(e) => setContacts(e.target.value)}
+              required
+            />
+            <p className="text-xs text-slate-400 mt-1">Укажите ссылку на ваш VK или Telegram.</p>
+          </section>
+
+          {/* Подтверждение оплаты */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <label htmlFor="paymentLast4" className="block text-sm font-medium">Подтверждение оплаты <Req /></label>
+            <p className="text-sm text-slate-400 mb-2">Укажите последние 4 цифры карты и выберите способ оплаты</p>
+            <div className="flex items-center gap-3">
+              <input
+                id="paymentLast4" inputMode="numeric" autoComplete="off"
+                maxLength={4} pattern="\d{4}" required placeholder="1234"
+                className="w-24 rounded-xl bg-slate-900/60 border px-3 py-2 text-center tracking-widest outline-none focus:border-emerald-400"
+                value={paymentLast4}
+                onChange={(e) => setPaymentLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              />
+              <select
+                id="paymentMethod" required
+                className="flex-1 rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 outline-none focus:border-emerald-400"
+                value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                <option value="" disabled>Выберите способ оплаты</option>
+                <option>Сбербанк — 2202 2032 9079</option>
+                <option>Альфа-Банк — 2200 1509 9435</option>
+                <option>Т-Банк — 2200 7001 1816</option>
+                <option>Donatty — donatty.com/</option>
+                <option>ЮMoney — yoomoney.ru/to/</option>
+              </select>
             </div>
-            
-            <div class="section-divider"></div>
-            
-            <!-- Блок с контактами -->
-            <div class="form-group required">
-                <label for="contact">Контакты для связи</label>
-                <p class="form-note">Укажите ссылку на ваш VK или Telegram</p>
-                <input type="url" id="contact" name="contact" required placeholder="https://vk.com/username или https://t.me/username">
-                <div class="error-message" id="contact-error"></div>
+            <div className="flex items-baseline gap-3">
+              <p className="text-xs text-red-400 mt-2">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
+              {!last4IsValid && paymentLast4 !== "" && <p className="text-xs text-red-400 mt-2">Укажите ровно 4 цифры</p>}
             </div>
-            
-            <!-- Блок подтверждения оплаты -->
-            <div class="form-group required">
-                <label>Подтверждение оплаты</label>
-                <p class="form-note">Укажите последние 4 цифры карты и выберите способ оплаты</p>
-                
-                <div class="card-input">
-                    <span>•••• •••• ••••</span>
-                    <input type="text" 
-                           class="card-digits" 
-                           name="last4digits" 
-                           pattern="\d{4}" 
-                           maxlength="4" 
-                           placeholder="1234" 
-                           required
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                </div>
-                <div class="error-message" id="card-error"></div>
-                
-                <div class="bank-select">
-                    <select name="bank" required>
-                        <option value="" disabled selected>Выберите способ оплаты</option>
-                        <option value="Sberbank">💚 Сбербанк</option>
-                        <option value="Alfabank">❤️ Альфа-Банк</option>
-                        <option value="Tinkoff">💛 Т-Банк</option>
-                        <option value="Donate">🎁 Донат (donatty.com)</option>
-                        <option value="YooMoney">💳 ЮMoney</option>
-                    </select>
-                    <p class="form-note">Укажите, куда именно вы совершили перевод</p>
-                </div>
-                <div class="error-message" id="bank-error"></div>
-                
-                <p class="security-warning">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
-            </div>
-            
-            <div class="payment-details">
-                <p><strong>Реквизиты для перевода:</strong></p>
+          </section>
+
+          {/* Реквизиты */}
+          <section className="bg-slate-900/50 rounded-2xl shadow-inner p-6 border border-slate-700">
+            <div className="text-center space-y-4">
+              <h3 className="text-lg font-semibold">Реквизиты для перевода:</h3>
+              <div className="space-y-2 text-slate-200">
                 <p>💚 Сбербанк — 2202 2032 9079 4421</p>
                 <p>❤️ Альфа-Банк — 2200 1509 9435 5391</p>
                 <p>💛 Т-Банк — 2200 7001 1816 8359</p>
-                <p>🎁 Донат — donatty.com/marktvenboost</p>
-                <p>💳 ЮMoney — yoomoney.ru/to/410014747956154</p>
+                <p>Донат — donatty.com/marktvenboost</p>
+                <p>ЮMoney — yoomoney.ru/to/410014747956154</p>
+              </div>
             </div>
-            
-            <!-- Прогресс-бар -->
-            <div class="progress-bar" id="progressBarContainer">
-                <div class="progress" id="uploadProgress"></div>
-            </div>
-            
-            <div class="loading" id="loading">
-                <div class="loading-spinner"></div>
-                <p>Отправка данных...</p>
-            </div>
-            
-            <button type="submit" class="submit-btn" id="submitBtn">Оформить заказ</button>
+          </section>
+
+          {/* Информация и ссылка */}
+          <section className="bg-slate-800/60 rounded-2xl shadow-lg p-5 border border-slate-700">
+            <p className="text-center text-slate-200">
+              Заказ сразу будет добавлен в очередь.
+              <br />Если у вас появятся дополнительные вопросы, напишите мне:{" "}
+              <a href="https://vk.com/markboostgta" target="_blank" rel="noreferrer" className="text-emerald-300 underline">vk.com/markboostgta</a>
+            </p>
+          </section>
+
+          {/* Honeypot */}
+          <div className="hidden">
+            <label>Ваш сайт
+              <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} />
+            </label>
+          </div>
+
+          {/* Submit */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <button
+              type="submit"
+              disabled={!canSubmit || submitting}
+              className={`px-6 py-3 rounded-2xl font-semibold shadow-lg transition ${
+                canSubmit && !submitting
+                  ? "bg-emerald-500 text-slate-900 hover:bg-emerald-400"
+                  : "bg-slate-700 text-slate-400 cursor-not-allowed"
+              }`}
+            >
+              {submitting ? "Отправка..." : "Отправить заявку"}
+            </button>
+            {error && <span className="text-red-400 text-sm">{error}</span>}
+            {success && <span className="text-emerald-300 text-sm">{success}</span>}
+          </div>
         </form>
-        
-        <div class="footer">
-            <div class="telegram-contacts">
-                <p><strong>Наши контакты в Telegram:</strong></p>
-                <a href="https://t.me/kot_flopp" target="_blank">@kot_flopp (помощник)</a>
-                <a href="https://t.me/GTAONLINE5BOOST" target="_blank">@GTAONLINE5BOOST (автор)</a>
-            </div>
-            <p>Заказ сразу будет добавлен в очередь</p>
-            <p>Если у вас появятся дополнительные вопросы, напишите нам</p>
-        </div>
+      </div>
     </div>
-
-    <script>
-        // Конфигурация Trello
-        const TRELLO_CONFIG = {
-            API_KEY: '17bbfe1a2af1308027cbf9ee6d32c892',
-            TOKEN: 'ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D',
-            LIST_ID: '685fbecf9de5902f7c319e31'
-        };
-
-        // ======================
-        // Таймер обратного отсчета
-        // ======================
-        class CountdownTimer {
-            constructor(duration, elementId) {
-                this.duration = duration.split(':').map(Number);
-                this.totalSeconds = this.duration[0] * 3600 + this.duration[1] * 60 + this.duration[2];
-                this.element = document.getElementById(elementId);
-                this.interval = null;
-                this.start();
-            }
-
-            start() {
-                this.interval = setInterval(() => {
-                    this.totalSeconds--;
-                    if (this.totalSeconds <= 0) {
-                        clearInterval(this.interval);
-                        this.element.textContent = "Акция завершена!";
-                        return;
-                    }
-
-                    const hours = Math.floor(this.totalSeconds / 3600);
-                    const minutes = Math.floor((this.totalSeconds % 3600) / 60);
-                    const seconds = this.totalSeconds % 60;
-
-                    this.element.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                }, 1000);
-            }
-        }
-
-        // Инициализация таймера
-        document.addEventListener('DOMContentLoaded', () => {
-            new CountdownTimer('24:00:00', 'timer');
-        });
-
-        // ======================
-        // Обработка формы
-        // ======================
-        document.getElementById('orderForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Сброс сообщений об ошибках
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.style.display = 'none';
-                el.textContent = '';
-            });
-            
-            // Валидация формы
-            let isValid = true;
-            
-            // Проверка лаунчера
-            if (!document.querySelector('input[name="launcher"]:checked')) {
-                document.getElementById('launcher-error').textContent = 'Выберите лаунчер';
-                document.getElementById('launcher-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка версии
-            if (!document.querySelector('input[name="version"]:checked')) {
-                document.getElementById('version-error').textContent = 'Выберите версию игры';
-                document.getElementById('version-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка логина
-            const login = document.getElementById('login').value.trim();
-            if (!login) {
-                document.getElementById('login-error').textContent = 'Введите логин';
-                document.getElementById('login-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка пароля
-            const password = document.getElementById('password').value.trim();
-            if (!password) {
-                document.getElementById('password-error').textContent = 'Введите пароль';
-                document.getElementById('password-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка уровня
-            const level = parseInt(document.getElementById('level').value);
-            if (isNaN(level)) {
-                document.getElementById('level-error').textContent = 'Введите уровень';
-                document.getElementById('level-error').style.display = 'block';
-                isValid = false;
-            } else if (level < 1 || level > 8000) {
-                document.getElementById('level-error').textContent = 'Уровень должен быть от 1 до 8000';
-                document.getElementById('level-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка контактов
-            const contact = document.getElementById('contact').value.trim();
-            if (!contact) {
-                document.getElementById('contact-error').textContent = 'Введите контакты';
-                document.getElementById('contact-error').style.display = 'block';
-                isValid = false;
-            } else if (!contact.startsWith('https://vk.com/') && !contact.startsWith('https://t.me/')) {
-                document.getElementById('contact-error').textContent = 'Укажите ссылку VK (https://vk.com/) или Telegram (https://t.me/)';
-                document.getElementById('contact-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка 4 цифр карты
-            const last4digits = document.querySelector('input[name="last4digits"]').value;
-            if (!/^\d{4}$/.test(last4digits)) {
-                document.getElementById('card-error').textContent = 'Введите 4 последние цифры карты';
-                document.getElementById('card-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            // Проверка выбора банка
-            const bankSelect = document.querySelector('select[name="bank"]');
-            if (!bankSelect.value) {
-                document.getElementById('bank-error').textContent = 'Выберите способ оплаты';
-                document.getElementById('bank-error').style.display = 'block';
-                isValid = false;
-            }
-            
-            if (!isValid) {
-                return;
-            }
-            
-            // Показать индикатор загрузки и прогресс-бар
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
-            const progressBar = document.getElementById('uploadProgress');
-            const progressContainer = document.getElementById('progressBarContainer');
-            
-            submitBtn.disabled = true;
-            loading.style.display = 'block';
-            progressContainer.style.display = 'block';
-            
-            // Анимация прогресс-бара
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 10;
-                if (progress > 90) clearInterval(progressInterval);
-                progressBar.style.width = `${Math.min(progress, 100)}%`;
-            }, 300);
-
-            try {
-                // Собираем данные формы
-                const formData = {
-                    launcher: document.querySelector('input[name="launcher"]:checked').value,
-                    version: document.querySelector('input[name="version"]:checked').value,
-                    login: login,
-                    password: '******', // Не сохраняем реальный пароль
-                    money: document.getElementById('money').value,
-                    level: level,
-                    contact: contact,
-                    payment: {
-                        last4digits: last4digits,
-                        bank: bankSelect.value
-                    },
-                    options: {
-                        skills: document.getElementById('skills').checked,
-                        lsc: document.getElementById('lsc').checked,
-                        weapons: document.getElementById('weapons').checked,
-                        masks: document.getElementById('masks').checked,
-                        clothes: document.getElementById('clothes').checked,
-                        parachutes: document.getElementById('parachutes').checked,
-                        tattoos: document.getElementById('tattoos').checked,
-                        achievements: document.getElementById('achievements').checked,
-                        contacts: document.getElementById('contacts').checked,
-                        bunker: document.getElementById('bunker').checked,
-                        bunker_rewards: document.getElementById('bunker_rewards').checked,
-                        untrustworthy: document.getElementById('untrustworthy').checked,
-                        kosatka: document.getElementById('kosatka').checked,
-                        gender: document.getElementById('gender').checked,
-                        gangLevel: document.getElementById('gangLevel').checked,
-                        arenaLevel: document.getElementById('arenaLevel').checked,
-                        clubLevel: document.getElementById('clubLevel').checked
-                    }
-                };
-
-                // Формируем описание для карточки Trello
-                const description = `
-**Детали заявки:**
-- Лаунчер: ${formData.launcher}
-- Версия: ${formData.version}
-- Логин: ${formData.login}
-- Уровень: ${formData.level}
-- Игровая валюта: ${formData.money}
-- Контакты: ${formData.contact}
-
-**Оплата:**
-- Банк: ${formData.payment.bank}
-- Последние 4 цифры: ••••${formData.payment.last4digits}
-
-**Дополнительные опции:**
-${Object.entries(formData.options)
-    .filter(([_, value]) => value)
-    .map(([key]) => `- ${key}`)
-    .join('\n') || 'Нет дополнительных опций'}
-                `;
-
-                // Отправляем данные в Trello
-                const response = await fetch(`https://api.trello.com/1/cards?key=${TRELLO_CONFIG.API_KEY}&token=${TRELLO_CONFIG.TOKEN}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: `GTA BOOST - ${formData.login}`,
-                        desc: description,
-                        pos: 'top',
-                        idList: TRELLO_CONFIG.LIST_ID
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Ошибка при создании карточки в Trello');
-                }
-
-                const result = await response.json();
-                
-                // Завершаем анимацию прогресса
-                clearInterval(progressInterval);
-                progressBar.style.width = '100%';
-                
-                // Показываем анимированное сообщение
-                const successMessage = document.getElementById('successMessage');
-                successMessage.innerHTML = `
-                    <p>✅ Заявка <strong>#${result.idShort}</strong> успешно создана!</p>
-                    <p>Мы свяжемся с вами в ближайшее время.</p>
-                `;
-                successMessage.style.display = 'block';
-                
-                // Скрываем форму
-                this.style.display = 'none';
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                progressBar.style.backgroundColor = '#e74c3c';
-                alert(`❌ Ошибка: ${error.message}\nПожалуйста, свяжитесь с нами через Telegram.`);
-            } finally {
-                submitBtn.disabled = false;
-                loading.style.display = 'none';
-            }
-        });
-    </script>
-</body>
-</html>
+  );
+}
