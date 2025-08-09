@@ -5,18 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>ПРОКАЧКА GTA ONLINE — Заявка</title>
 
-  <!-- Tailwind (dark mode через class) -->
+  <!-- Подключаем TailwindCSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { darkMode: 'class' };</script>
 
-  <!-- React 18 UMD -->
+  <!-- Подключаем React 18 -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
-  <!-- Babel для JSX -->
+  <!-- Подключаем Babel для компиляции JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
+    /* Минимальные стили */
     .press { transition: transform .06s ease; }
     .press:active { transform: scale(0.98); }
     .modal-enter { opacity: 0; transform: scale(0.96); }
@@ -36,17 +37,6 @@
         max-width: 100%;
       }
     }
-    
-    /* Убираем дефолтный стиль на мобильных */
-    input, select, textarea, button {
-      -webkit-appearance: none;
-      border-radius: 0;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      box-sizing: border-box;
-    }
 
     /* Подсветка ошибок */
     input.error, select.error {
@@ -55,15 +45,19 @@
   </style>
 </head>
 <body class="h-full bg-slate-100 dark:bg-slate-900">
+
+  <!-- Место для рендера React компонента -->
   <div id="root" class="h-full"></div>
 
-  <script type="text/babel" data-presets="env,react">
-    const TRELLO_KEY = "17bbfe1a2af1308027cbf9ee6d32c892";
-    const TRELLO_TOKEN = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";
-    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";
-    const TG_BOT_TOKEN = "";
-    const TG_CHAT_ID = "";
+  <script type="text/babel">
+    const { useState, useMemo } = React;
 
+    // Параметры для Trello API
+    const TRELLO_KEY = "17bbfe1a2af1308027cbf9ee6d32c892";  // Замените на ваш API ключ
+    const TRELLO_TOKEN = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";  // Замените на ваш токен
+    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";  // Замените на ID вашего списка в Trello
+
+    // Формируем список лаунчеров и версий игры
     const LAUNCHERS = [
       { value: "Steam", label: "Steam", logo: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" },
       { value: "EpicGames", label: "Epic", logo: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg" },
@@ -210,15 +204,6 @@
 
       function toggleInArray(v, list, setter) {
         setter(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
-      }
-
-      // формат «Отдельные уровни»
-      function formatExtraLevels() {
-        if (!extraLevels.length) return "—";
-        return extraLevels.map(lbl => {
-          const v = (extraLevelInputs[lbl] || "").trim();
-          return v ? `${lbl}: ${v}` : lbl;
-        }).join(", ");
       }
 
       // Trello + Telegram
