@@ -22,63 +22,31 @@
   <style>
     .press { transition: transform .06s ease; }
     .press:active { transform: scale(0.98); }
-
-    /* Плавная анимация модалки */
     .modal-enter { opacity: 0; transform: scale(0.96); }
     .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity .18s ease, transform .18s ease; }
-    .modal-exit { opacity: 1; transform: scale(1); }
-    .modal-exit-active { opacity: 0; transform: scale(0.96); transition: opacity .16s ease, transform .16s ease; }
   </style>
 </head>
 <body class="h-full bg-slate-100 dark:bg-slate-900">
   <div id="root" class="h-full"></div>
 
-  <script type="text/babel">
-    // ================= CONFIG =================
+  <!-- ВАЖНО: пресеты для JSX -->
+  <script type="text/babel" data-presets="env,react">
     const TRELLO_KEY     = "17bbfe1a2af1308027cbf9ee6d32c892";  // ← твой Trello API key
     const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";  // ← твой Trello token
-    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";  // ← ID списка (куда падают заявки)
-
-    // Telegram Bot (для уведомлений)
+    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";  // ← ID списка
     const TG_BOT_TOKEN = "";    // ← токен бота
-    const TG_CHAT_ID   = "";    // ← твой chat_id
+    const TG_CHAT_ID   = "";    // ← chat_id
 
-    // ================= Справочники =================
-    // Логотипы берём из Википедии — ничего загружать не нужно
     const LAUNCHERS = [
-      { value: "Steam",      label: "Steam",                     logo: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" },
-      { value: "EpicGames",  label: "Epic",                      logo: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg" },
-      { value: "SocialClub", label: "Rockstar (SocialClub)",     logo: "https://upload.wikimedia.org/wikipedia/commons/5/59/Rockstar_Games_Logo.svg" },
+      { value: "Steam",      label: "Steam",                 logo: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" },
+      { value: "EpicGames",  label: "Epic",                  logo: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg" },
+      { value: "SocialClub", label: "Rockstar (SocialClub)", logo: "https://upload.wikimedia.org/wikipedia/commons/5/59/Rockstar_Games_Logo.svg" },
     ];
-
-    const GAME_VERSIONS = [
-      { value: "Enhanced", label: "Enhanced" },
-      { value: "Legacy",   label: "Legacy" },
-    ];
-
-    const MONEY_OPTIONS = [
-      "30 млн","40 млн","50 млн","60 млн","70 млн","80 млн","90 млн","100 млн",
-      "110 млн","120 млн","130 млн","140 млн","150 млн","160 млн","170 млн",
-      "180 млн","190 млн","250 млн","500 млн","750 млн","1 млрд","2 млрд","3 млрд","4 млрд"
-    ];
-
-    const EXTRA_LEVELS = [
-      "8000 уровень банды",
-      "1000 уровень арены",
-      "1000 уровень автоклуба",
-    ];
-
-    const UNLOCKS_MAIN = [
-      "Открыть все скиллы","Открыть LSC тюнинг","Открыть оружие","Открыть маски",
-      "Открыть одежду","Открыть парашюты","Открыть татуировки","Открыть все достижения",
-      "Открыть контакты в телефоне",
-    ];
-
-    const UNLOCKS_EXTRA = [
-      "Открыть разработки бункера","Открыть награды тира в бункере","Удалить статус «ненадёжный»",
-      "Открыть косатку для покупки","Сменить пол персонажа",
-    ];
-
+    const GAME_VERSIONS = [{ value: "Enhanced", label: "Enhanced" },{ value: "Legacy", label: "Legacy" }];
+    const MONEY_OPTIONS = ["30 млн","40 млн","50 млн","60 млн","70 млн","80 млн","90 млн","100 млн","110 млн","120 млн","130 млн","140 млн","150 млн","160 млн","170 млн","180 млн","190 млн","250 млн","500 млн","750 млн","1 млрд","2 млрд","3 млрд","4 млрд"];
+    const EXTRA_LEVELS = ["8000 уровень банды","1000 уровень арены","1000 уровень автоклуба"];
+    const UNLOCKS_MAIN = ["Открыть все скиллы","Открыть LSC тюнинг","Открыть оружие","Открыть маски","Открыть одежду","Открыть парашюты","Открыть татуировки","Открыть все достижения","Открыть контакты в телефоне"];
+    const UNLOCKS_EXTRA = ["Открыть разработки бункера","Открыть награды тира в бункере","Удалить статус «ненадёжный»","Открыть косатку для покупки","Сменить пол персонажа"];
     const REQUISITES = [
       { label: "💚 Сбербанк —", value: "2202 2032 9079 4421" },
       { label: "❤️ Альфа-Банк —", value: "2200 1509 9435 5391" },
@@ -87,137 +55,42 @@
       { label: "ЮMoney —", value: "yoomoney.ru/to/410014747956154" },
     ];
 
-    // ================= Утилиты =================
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     const Req = () => <span className="text-red-500">*</span>;
+    function copyToClipboard(text){ if(navigator.clipboard?.writeText){navigator.clipboard.writeText(text).catch(fallback)} else fallback(); function fallback(){const t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();} }
+    function useTheme(){const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches; const [dark,setDark]=React.useState(localStorage.getItem('theme')?localStorage.getItem('theme')==='dark':prefersDark); React.useEffect(()=>{const html=document.documentElement; dark?html.classList.add('dark'):html.classList.remove('dark'); localStorage.setItem('theme',dark?'dark':'light');},[dark]); return [dark,setDark];}
+    async function trelloPOST(url,params){const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN); Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v)); const res=await fetch(u.toString(),{method:"POST"}); if(!res.ok) throw new Error(await res.text()); return res.json();}
+    async function trelloPUT(url,params){const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN); Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v)); const res=await fetch(u.toString(),{method:"PUT"}); if(!res.ok) throw new Error(await res.text()); return res.json();}
+    async function sendTelegramMessage(text){ if(!TG_BOT_TOKEN||!TG_CHAT_ID) return; try{const r=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT_ID,text,parse_mode:"HTML",disable_web_page_preview:true})}); if(!r.ok) console.warn("Telegram error:",await r.text());}catch(e){console.warn("Telegram send failed:",e?.message||e);} }
 
-    function copyToClipboard(text) {
-      if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(text).catch(()=>fallback());
-      } else fallback();
-      function fallback() {
-        const t = document.createElement('textarea');
-        t.value = text; document.body.appendChild(t);
-        t.select(); document.execCommand('copy'); t.remove();
-      }
-    }
+    function GTAOrderForm(){
+      const [dark,setDark]=useTheme();
+      const [launcher,setLauncher]=React.useState(LAUNCHERS[0].value);
+      const [version,setVersion]=React.useState(GAME_VERSIONS[0].value);
+      const [login,setLogin]=React.useState(""); const [password,setPassword]=React.useState("");
+      const [money,setMoney]=React.useState(null); const [level,setLevel]=React.useState("");
+      const [extraLevels,setExtraLevels]=React.useState([]); const [mainUnlocks,setMainUnlocks]=React.useState([]); const [extraUnlocks,setExtraUnlocks]=React.useState([]);
+      const [contacts,setContacts]=React.useState("");
+      const [paymentLast4,setPaymentLast4]=React.useState(""); const [paymentMethod,setPaymentMethod]=React.useState("");
+      const [submitting,setSubmitting]=React.useState(false); const [error,setError]=React.useState(null); const [success,setSuccess]=React.useState(null);
+      const [showPreview,setShowPreview]=React.useState(false); const [modalAnimClass,setModalAnimClass]=React.useState("modal-enter");
 
-    function useTheme() {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const [dark, setDark] = React.useState(
-        localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : prefersDark
-      );
-      React.useEffect(() => {
-        const html = document.documentElement;
-        if (dark) html.classList.add('dark'); else html.classList.remove('dark');
-        localStorage.setItem('theme', dark ? 'dark' : 'light');
-      }, [dark]);
-      return [dark, setDark];
-    }
+      const loginNeedsEmail = launcher==="EpicGames" || launcher==="SocialClub";
+      const levelIsValid = React.useMemo(()=>{ if(!level) return false; const n=Number(level); return Number.isInteger(n)&&n>=1&&n<=8000; },[level]);
+      const last4IsValid  = React.useMemo(()=>/^\d{4}$/.test(paymentLast4),[paymentLast4]);
+      const loginIsValid  = React.useMemo(()=>{ if(!login.trim()) return false; return loginNeedsEmail ? emailRegex.test(login.trim()) : true; },[login,loginNeedsEmail]);
+      const canSubmit = React.useMemo(()=> launcher&&version&&loginIsValid&&password.trim()&&levelIsValid&&contacts.trim()&&money!==null&&last4IsValid&&!!paymentMethod, [launcher,version,loginIsValid,password,levelIsValid,contacts,money,last4IsValid,paymentMethod]);
 
-    // ================= Trello/Telegram helpers =================
-    async function trelloPOST(url, params) {
-      const u = new URL(url);
-      u.searchParams.set("key", TRELLO_KEY);
-      u.searchParams.set("token", TRELLO_TOKEN);
-      Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
-      const res = await fetch(u.toString(), { method: "POST" });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    }
-    async function trelloPUT(url, params) {
-      const u = new URL(url);
-      u.searchParams.set("key", TRELLO_KEY);
-      u.searchParams.set("token", TRELLO_TOKEN);
-      Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
-      const res = await fetch(u.toString(), { method: "PUT" });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    }
-    async function sendTelegramMessage(text) {
-      if (!TG_BOT_TOKEN || !TG_CHAT_ID) return;
-      try {
-        const res = await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: TG_CHAT_ID, text, parse_mode: "HTML", disable_web_page_preview: true })
-        });
-        if (!res.ok) console.warn("Telegram error:", await res.text());
-      } catch (e) {
-        console.warn("Telegram send failed:", e?.message || e);
-      }
-    }
+      const progress = React.useMemo(()=>{ const parts=[!!launcher,!!version,loginIsValid,!!password.trim(),levelIsValid,!!contacts.trim(),money!==null,last4IsValid,!!paymentMethod]; const done=parts.filter(Boolean).length; return Math.round(done/parts.length*100); },[launcher,version,loginIsValid,password,levelIsValid,contacts,money,last4IsValid,paymentMethod]);
+      function toggleInArray(v,list,setter){ setter(list.includes(v)?list.filter(x=>x!==v):[...list,v]); }
 
-    // ================= Компонент =================
-    function GTAOrderForm() {
-      const [dark, setDark] = useTheme();
-
-      const [launcher, setLauncher] = React.useState(LAUNCHERS[0].value);
-      const [version, setVersion]   = React.useState(GAME_VERSIONS[0].value);
-      const [login, setLogin]       = React.useState("");
-      const [password, setPassword] = React.useState("");
-      const [money, setMoney]       = React.useState(null);
-      const [level, setLevel]       = React.useState("");
-      const [extraLevels, setExtraLevels] = React.useState([]);
-      const [mainUnlocks, setMainUnlocks] = React.useState([]);
-      const [extraUnlocks, setExtraUnlocks] = React.useState([]);
-      const [contacts, setContacts] = React.useState("");
-
-      const [paymentLast4, setPaymentLast4] = React.useState("");
-      const [paymentMethod, setPaymentMethod] = React.useState("");
-
-      const [submitting, setSubmitting] = React.useState(false);
-      const [error, setError]     = React.useState(null);
-      const [success, setSuccess] = React.useState(null);
-      const [showPreview, setShowPreview] = React.useState(false);
-      const [modalAnimClass, setModalAnimClass] = React.useState("modal-enter"); // для анимации модалки
-
-      // логика логина/email
-      const loginNeedsEmail = launcher === "EpicGames" || launcher === "SocialClub";
-
-      // валидации
-      const levelIsValid = React.useMemo(() => {
-        if (!level) return false;
-        const n = Number(level);
-        return Number.isInteger(n) && n >= 1 && n <= 8000;
-      }, [level]);
-
-      const last4IsValid = React.useMemo(() => /^\d{4}$/.test(paymentLast4), [paymentLast4]);
-
-      const loginIsValid = React.useMemo(() => {
-        if (!login.trim()) return false;
-        return loginNeedsEmail ? emailRegex.test(login.trim()) : true;
-      }, [login, loginNeedsEmail]);
-
-      const canSubmit = React.useMemo(() =>
-        launcher && version && loginIsValid && password.trim() &&
-        levelIsValid && contacts.trim() && money !== null &&
-        last4IsValid && !!paymentMethod
-      , [launcher, version, loginIsValid, password, levelIsValid, contacts, money, last4IsValid, paymentMethod]);
-
-      // прогресс-бар
-      const progress = React.useMemo(() => {
-        const parts = [
-          !!launcher, !!version, loginIsValid, !!password.trim(),
-          levelIsValid, !!contacts.trim(), money !== null, last4IsValid, !!paymentMethod
-        ];
-        const done = parts.filter(Boolean).length;
-        return Math.round(done / parts.length * 100);
-      }, [launcher, version, loginIsValid, password, levelIsValid, contacts, money, last4IsValid, paymentMethod]);
-
-      function toggleInArray(value, list, setter) {
-        setter(list.includes(value) ? list.filter(x => x !== value) : [...list, value]);
-      }
-
-      // Trello создание + Telegram
-      async function createTrelloCard() {
+      async function createTrelloCard(){
         const title = `ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`;
         const descLines = [
           `Лаунчер: ${launcher}`,
           `Версия: ${version}`,
           `Логин: ${login}`,
-          // ВАЖНО: пароль теперь НЕ скрыт
-          `Пароль: ${password}`,
+          `Пароль: ${password}`,                // ← НЕ скрываем
           `Игровая валюта: ${money ?? "не выбрано"}`,
           `Уровень персонажа: ${level}`,
           `Отдельные уровни: ${extraLevels.length ? extraLevels.join(", ") : "—"}`,
@@ -229,25 +102,15 @@
           `Источник: форма заявки`,
         ];
 
-        // 1) карточка
-        const card = await trelloPOST("https://api.trello.com/1/cards", {
-          idList: TRELLO_LIST_ID,
-          name: title,
-          desc: descLines.join("\n"),
-        });
+        const card = await trelloPOST("https://api.trello.com/1/cards",{ idList:TRELLO_LIST_ID, name:title, desc:descLines.join("\n") });
 
-        // 2) чек-лист
-        const checklist = await trelloPOST(`https://api.trello.com/1/cards/${card.id}/checklists`, {
-          name: "Ответы заявки",
-        });
-
-        let idx = 1;
+        const checklist = await trelloPOST(`https://api.trello.com/1/cards/${card.id}/checklists`,{ name:"Ответы заявки" });
+        let idx=1;
         const items = [
           `Лаунчер: ${launcher}`,
           `Версия: ${version}`,
           `Логин: ${login}`,
-          // Пароль открытым текстом
-          `Пароль: ${password || "—"}`,
+          `Пароль: ${password || "—"}`,         // ← НЕ скрываем
           `Игровая валюта: ${money ?? "—"}`,
           `Уровень: ${level}`,
           `Отдельные уровни: ${extraLevels.length ? extraLevels.join(", ") : "—"}`,
@@ -256,114 +119,53 @@
           `Подтверждение оплаты: **** ${paymentLast4}`,
           `Способ оплаты: ${paymentMethod}`,
           `Контакты: ${contacts}`,
-        ].map(t => `${idx++}. ${t}`);
+        ].map(t=>`${idx++}. ${t}`);
+        for (const text of items){ await trelloPOST(`https://api.trello.com/1/checklists/${checklist.id}/checkItems`,{ name:text }); }
 
-        for (const text of items) {
-          await trelloPOST(`https://api.trello.com/1/checklists/${checklist.id}/checkItems`, { name: text });
-        }
+        if (card.idShort){ await trelloPUT(`https://api.trello.com/1/cards/${card.id}/name`,{ value:`#${card.idShort} ПРОКАЧКА GTA ONLINE — ${contacts||"без контактов"}` }); }
 
-        // 3) Переименовать с номером заявки
-        if (card.idShort) {
-          const newName = `#${card.idShort} ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`;
-          await trelloPUT(`https://api.trello.com/1/cards/${card.id}/name`, { value: newName });
-        }
-
-        // 4) Telegram уведомление
         await sendTelegramMessage(
-          `<b>Новая заявка #${card.idShort ?? card.id}</b>\n` +
-          `Лаунчер: ${launcher}\nВерсия: ${version}\n` +
-          `Валюта: ${money ?? "—"} | Уровень: ${level}\n` +
+          `<b>Новая заявка #${card.idShort ?? card.id}</b>\n`+
+          `Лаунчер: ${launcher}\nВерсия: ${version}\n`+
+          `Валюта: ${money ?? "—"} | Уровень: ${level}\n`+
           `Контакты: ${contacts}`
         );
-
         return card;
       }
 
-      // Конфетти 🎉
-      function fireConfetti() {
-        if (!window.confetti) return;
-        const duration = 1300;
-        const end = Date.now() + duration;
-        (function frame() {
-          window.confetti({
-            particleCount: 3,
-            angle: 60,
-            spread: 60,
-            origin: { x: 0, y: 0.8 }
-          });
-          window.confetti({
-            particleCount: 3,
-            angle: 120,
-            spread: 60,
-            origin: { x: 1, y: 0.8 }
-          });
-          if (Date.now() < end) requestAnimationFrame(frame);
-        })();
-      }
+      function fireConfetti(){ if(!window.confetti) return; const duration=1300; const end=Date.now()+duration; (function frame(){ window.confetti({particleCount:3,angle:60,spread:60,origin:{x:0,y:0.8}}); window.confetti({particleCount:3,angle:120,spread:60,origin:{x:1,y:0.8}}); if(Date.now()<end) requestAnimationFrame(frame); })(); }
 
-      async function handleConfirmSubmit() {
-        try {
+      async function handleConfirmSubmit(){
+        try{
           setSubmitting(true);
           const card = await createTrelloCard();
           setSuccess(`Заявка отправлена! Номер карточки: #${card.idShort ?? card.id}`);
           setShowPreview(false);
-          fireConfetti(); // 🎉
-
-          // сброс формы
-          setLauncher(LAUNCHERS[0].value);
-          setVersion(GAME_VERSIONS[0].value);
-          setLogin(""); setPassword("");
-          setMoney(null); setLevel("");
-          setExtraLevels([]); setMainUnlocks([]); setExtraUnlocks([]);
-          setContacts(""); setPaymentLast4(""); setPaymentMethod("");
-        } catch (err) {
-          console.error(err);
-          setError(err.message || "Ошибка при отправке");
-        } finally {
-          setSubmitting(false);
-        }
+          fireConfetti();
+          setLauncher(LAUNCHERS[0].value); setVersion(GAME_VERSIONS[0].value); setLogin(""); setPassword(""); setMoney(null); setLevel(""); setExtraLevels([]); setMainUnlocks([]); setExtraUnlocks([]); setContacts(""); setPaymentLast4(""); setPaymentMethod("");
+        }catch(err){ console.error(err); setError(err.message||"Ошибка при отправке"); }
+        finally{ setSubmitting(false); }
       }
 
-      // Анимация появления модалки
-      React.useEffect(() => {
-        if (showPreview) {
-          // небольшая задержка, чтобы применились классы enter → enter-active
-          requestAnimationFrame(() => setModalAnimClass("modal-enter-active"));
-        } else {
-          setModalAnimClass("modal-enter");
-        }
-      }, [showPreview]);
+      React.useEffect(()=>{ if(showPreview){ requestAnimationFrame(()=>setModalAnimClass("modal-enter-active")); } else { setModalAnimClass("modal-enter"); } },[showPreview]);
 
-      const currentLauncher = LAUNCHERS.find(l => l.value === launcher);
+      const currentLauncher = LAUNCHERS.find(l=>l.value===launcher);
 
-      // ================= Render =================
       return (
         <div className="min-h-screen">
-          {/* Тулбар + тема + прогресс */}
           <div className="sticky top-0 z-20 backdrop-blur bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800">
             <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                {currentLauncher?.logo && (
-                  <img src={currentLauncher.logo} alt={currentLauncher.label} className="w-6 h-6 object-contain" />
-                )}
+                {currentLauncher?.logo && <img src={currentLauncher.logo} alt={currentLauncher.label} className="w-6 h-6 object-contain" />}
                 <div className="font-semibold text-slate-700 dark:text-slate-200">ПРОКАЧКА GTA ONLINE — заявка</div>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  className="press text-sm px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  onClick={() => setDark(d => !d)} type="button" title="Переключить тему"
-                >
-                  {dark ? "🌙 Тёмная" : "☀️ Светлая"}
-                </button>
+                <button className="press text-sm px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={()=>setDark(d=>!d)} type="button">{dark?"🌙 Тёмная":"☀️ Светлая"}</button>
               </div>
             </div>
-            <!-- Плавный прогресс: анимируем ТОЛЬКО width -->
+            {/* Плавный прогресс — анимируем только width */}
             <div className="w-full h-1 bg-slate-200 dark:bg-slate-800">
-              <div
-                className="h-1 bg-emerald-500 transition-[width] duration-500 ease-in-out will-change-[width]"
-                style={{ width: `${progress}%` }}
-                aria-label={`Заполнено ${progress}%`}
-              />
+              <div className="h-1 bg-emerald-500 transition-[width] duration-500 ease-in-out will-change-[width]" style={{ width: `${progress}%` }} />
             </div>
           </div>
 
@@ -373,24 +175,19 @@
               <p className="mt-2 text-slate-600 dark:text-slate-300">Заполните форму — заказ сразу будет добавлен в очередь.</p>
             </header>
 
-            <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); if (canSubmit) setShowPreview(true); }}>
-              {/* Лаунчер (кнопки с логотипами) */}
+            <form className="space-y-8" onSubmit={(e)=>{ e.preventDefault(); if(canSubmit) setShowPreview(true); }}>
+              {/* Лаунчер */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-lg font-semibold">В каком лаунчере куплена игра?</h2>
-                  {currentLauncher?.logo && (
-                    <img src={currentLauncher.logo} alt={currentLauncher.label} className="w-8 h-8 object-contain" />
-                  )}
+                  {currentLauncher?.logo && <img src={currentLauncher.logo} alt={currentLauncher.label} className="w-8 h-8 object-contain" />}
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {LAUNCHERS.map((opt) => {
-                    const active = launcher === opt.value;
+                  {LAUNCHERS.map(opt=>{
+                    const active=launcher===opt.value;
                     return (
-                      <label key={opt.value}
-                        className={`press cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-all
-                        ${active ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm"
-                                 : "border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
-                        <input type="radio" name="launcher" className="sr-only" checked={active} onChange={() => setLauncher(opt.value)} />
+                      <label key={opt.value} className={`press cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${active?"border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm":"border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
+                        <input type="radio" name="launcher" className="sr-only" checked={active} onChange={()=>setLauncher(opt.value)} />
                         <img src={opt.logo} alt={opt.label} className="w-6 h-6 object-contain" />
                         <span className="font-medium">{opt.label}</span>
                       </label>
@@ -399,18 +196,15 @@
                 </div>
               </section>
 
-              {/* Версия игры */}
+              {/* Версия */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">Выберите версию игры</h2>
                 <div className="flex flex-wrap gap-3">
-                  {GAME_VERSIONS.map((opt) => {
-                    const active = version === opt.value;
+                  {GAME_VERSIONS.map(opt=>{
+                    const active=version===opt.value;
                     return (
-                      <label key={opt.value}
-                        className={`press cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-all
-                        ${active ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm"
-                                 : "border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
-                        <input type="radio" name="gameVersion" className="sr-only" checked={active} onChange={() => setVersion(opt.value)} />
+                      <label key={opt.value} className={`press cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${active?"border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm":"border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
+                        <input type="radio" name="gameVersion" className="sr-only" checked={active} onChange={()=>setVersion(opt.value)} />
                         <span className="font-medium">{opt.label}</span>
                       </label>
                     );
@@ -418,62 +212,39 @@
                 </div>
               </section>
 
-              {/* Данные входа: почта/логин */}
+              {/* Данные входа */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-4">Данные входа</h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      {loginNeedsEmail ? "Почта" : "Логин"} <Req />
-                    </label>
+                    <label className="block text-sm font-medium mb-1">{(launcher==="EpicGames"||launcher==="SocialClub")?"Почта":"Логин"} <Req/></label>
                     <input
-                      type={loginNeedsEmail ? "email" : "text"}
-                      className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition
-                        ${(!loginIsValid && login) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                      placeholder={loginNeedsEmail ? "email@example.com" : "Введите логин"}
+                      type={(launcher==="EpicGames"||launcher==="SocialClub")?"email":"text"}
+                      className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${(!(loginNeedsEmail?emailRegex.test(login.trim()):!!login.trim()) && login) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
+                      placeholder={(launcher==="EpicGames"||launcher==="SocialClub")?"email@example.com":"Введите логин"}
                       value={login}
-                      onChange={(e) => {
-                        let v = e.target.value.trim();
-                        if (loginNeedsEmail) v = v.toLowerCase();
-                        setLogin(v);
-                      }}
+                      onChange={(e)=>{let v=e.target.value.trim(); if(launcher==="EpicGames"||launcher==="SocialClub") v=v.toLowerCase(); setLogin(v);}}
                       required
                     />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      Steam — логин | Epic — почта | Rockstar — почта от SocialClub
-                    </p>
-                    {loginNeedsEmail && login && !loginIsValid && (
-                      <p className="text-xs text-red-500 mt-1">Введите корректный адрес электронной почты.</p>
-                    )}
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Steam — логин | Epic — почта | Rockstar — почта от SocialClub</p>
+                    {(launcher==="EpicGames"||launcher==="SocialClub") && login && !emailRegex.test(login.trim()) && <p className="text-xs text-red-500 mt-1">Введите корректный адрес электронной почты.</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Пароль <Req />
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition"
-                      placeholder="Введите пароль"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <label className="block text-sm font-medium mb-1">Пароль <Req/></label>
+                    <input type="password" className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition" placeholder="Введите пароль" value={password} onChange={(e)=>setPassword(e.target.value)} required />
                   </div>
                 </div>
               </section>
 
-              {/* Количество игровой валюты */}
+              {/* Валюта */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">💰 Количество игровой валюты</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {MONEY_OPTIONS.map((opt) => {
-                    const active = money === opt;
+                  {MONEY_OPTIONS.map(opt=>{
+                    const active=money===opt;
                     return (
-                      <label key={opt}
-                        className={`press cursor-pointer rounded-xl border px-4 py-2 text-sm text-center transition
-                        ${active ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm"
-                                 : "border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
-                        <input type="radio" name="money" className="sr-only" checked={active} onChange={() => setMoney(opt)} />
+                      <label key={opt} className={`press cursor-pointer rounded-xl border px-4 py-2 text-sm text-center transition ${active?"border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm":"border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
+                        <input type="radio" name="money" className="sr-only" checked={active} onChange={()=>setMoney(opt)} />
                         {opt}
                       </label>
                     );
@@ -481,23 +252,13 @@
                 </div>
               </section>
 
-              {/* Какой уровень персонажа сделать? */}
+              {/* Уровень */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <label className="block text-sm font-medium mb-1">Какой уровень персонажа сделать? <Req /></label>
-                <input
-                  type="number" min="1" max="8000"
-                  className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition
-                    ${level && !levelIsValid ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                  placeholder="Например: 500"
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value.replace(/[^\d]/g,'').slice(0,4))}
-                  required
-                />
+                <label className="block text-sm font-medium mb-1">Какой уровень персонажа сделать? <Req/></label>
+                <input type="number" min="1" max="8000" className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${level && !(Number.isInteger(Number(level)) && Number(level)>=1 && Number(level)<=8000) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`} placeholder="Например: 500" value={level} onChange={(e)=>setLevel(e.target.value.replace(/[^\d]/g,'').slice(0,4))} required />
                 <div className="flex items-baseline gap-3">
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">от 1 до 8000</p>
-                  {!levelIsValid && level !== "" && (
-                    <p className="text-xs text-red-500 mt-1">Укажите целое число 1–8000</p>
-                  )}
+                  {level!=="" && !(Number.isInteger(Number(level)) && Number(level)>=1 && Number(level)<=8000) && <p className="text-xs text-red-500 mt-1">Укажите целое число 1–8000</p>}
                 </div>
               </section>
 
@@ -505,11 +266,9 @@
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">Отдельные уровни</h2>
                 <div className="space-y-2">
-                  {EXTRA_LEVELS.map((label) => (
+                  {EXTRA_LEVELS.map(label=>(
                     <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="h-4 w-4 accent-emerald-500"
-                        checked={extraLevels.includes(label)}
-                        onChange={() => toggleInArray(label, extraLevels, setExtraLevels)} />
+                      <input type="checkbox" className="h-4 w-4 accent-emerald-500" checked={extraLevels.includes(label)} onChange={()=>toggleInArray(label,extraLevels,setExtraLevels)} />
                       <span>{label}</span>
                     </label>
                   ))}
@@ -520,11 +279,9 @@
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">🔓 Основные разблокировки</h2>
                 <div className="space-y-2">
-                  {UNLOCKS_MAIN.map((label) => (
+                  {UNLOCKS_MAIN.map(label=>(
                     <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="h-4 w-4 accent-emerald-500"
-                        checked={mainUnlocks.includes(label)}
-                        onChange={() => toggleInArray(label, mainUnlocks, setMainUnlocks)} />
+                      <input type="checkbox" className="h-4 w-4 accent-emerald-500" checked={mainUnlocks.includes(label)} onChange={()=>toggleInArray(label,mainUnlocks,setMainUnlocks)} />
                       <span>{label}</span>
                     </label>
                   ))}
@@ -535,51 +292,29 @@
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">🔓 Дополнительно</h2>
                 <div className="space-y-2">
-                  {UNLOCKS_EXTRA.map((label) => (
+                  {UNLOCKS_EXTRA.map(label=>(
                     <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="h-4 w-4 accent-emerald-500"
-                        checked={extraUnlocks.includes(label)}
-                        onChange={() => toggleInArray(label, extraUnlocks, setExtraUnlocks)} />
+                      <input type="checkbox" className="h-4 w-4 accent-emerald-500" checked={extraUnlocks.includes(label)} onChange={()=>toggleInArray(label,extraUnlocks,setExtraUnlocks)} />
                       <span>{label}</span>
                     </label>
                   ))}
                 </div>
               </section>
 
-              {/* Контакты для связи */}
+              {/* Контакты */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <label className="block text-sm font-medium mb-1">Контакты для связи <Req /></label>
-                <input
-                  type="text"
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition"
-                  placeholder="Укажите ссылку на ваш VK или Telegram"
-                  value={contacts}
-                  onChange={(e) => setContacts(e.target.value.trim())}
-                  required
-                />
+                <label className="block text-sm font-medium mb-1">Контакты для связи <Req/></label>
+                <input type="text" className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition" placeholder="Укажите ссылку на ваш VK или Telegram" value={contacts} onChange={(e)=>setContacts(e.target.value.trim())} required />
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Укажите ссылку на ваш VK или Telegram.</p>
               </section>
 
               {/* Подтверждение оплаты */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <label htmlFor="paymentLast4" className="block text-sm font-medium">Подтверждение оплаты <Req /></label>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                  Укажите последние 4 цифры карты и выберите способ оплаты
-                </p>
+                <label htmlFor="paymentLast4" className="block text-sm font-medium">Подтверждение оплаты <Req/></label>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Укажите последние 4 цифры карты и выберите способ оплаты</p>
                 <div className="flex items-center gap-3">
-                  <input
-                    id="paymentLast4" inputMode="numeric" autoComplete="off"
-                    maxLength="4" pattern="\d{4}" required placeholder="1234"
-                    className={`w-24 rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-3 py-2 text-center tracking-widest outline-none transition
-                      ${paymentLast4 && !last4IsValid ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                    value={paymentLast4}
-                    onChange={(e) => setPaymentLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                  />
-                  <select
-                    id="paymentMethod" required
-                    className="flex-1 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-2 outline-none focus:border-emerald-400 transition"
-                    value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}
-                  >
+                  <input id="paymentLast4" inputMode="numeric" autoComplete="off" maxLength="4" pattern="\d{4}" required placeholder="1234" className={`w-24 rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-3 py-2 text-center tracking-widest outline-none transition ${paymentLast4 && !/^\d{4}$/.test(paymentLast4) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`} value={paymentLast4} onChange={(e)=>setPaymentLast4(e.target.value.replace(/\D/g,"").slice(0,4))} />
+                  <select id="paymentMethod" required className="flex-1 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-2 outline-none focus:border-emerald-400 transition" value={paymentMethod} onChange={(e)=>setPaymentMethod(e.target.value)}>
                     <option value="" disabled>Выберите способ оплаты</option>
                     <option>Сбербанк — 2202 2032 9079 4421</option>
                     <option>Альфа-Банк — 2200 1509 9435 5391</option>
@@ -588,93 +323,63 @@
                     <option>ЮMoney — yoomoney.ru/to/410014747956154</option>
                   </select>
                 </div>
-                <div className="flex items-baseline gap-3">
-                  <p className="text-xs text-red-500 mt-2">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
-                  {!last4IsValid && paymentLast4 !== "" && <p className="text-xs text-red-500 mt-2">Укажите ровно 4 цифры</p>}
-                </div>
               </section>
 
-              {/* Реквизиты + копирование */}
+              {/* Реквизиты */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow-inner p-6 border border-slate-200 dark:border-slate-700">
                 <div className="text-center space-y-4">
                   <h3 className="text-lg font-semibold">Реквизиты для перевода:</h3>
                   <div className="max-w-md mx-auto space-y-2">
-                    {REQUISITES.map((r, i) => (
+                    {REQUISITES.map((r,i)=>(
                       <div key={i} className="flex items-center justify-between gap-3">
-                        <div className="text-slate-700 dark:text-slate-200">
-                          <span>{r.label}</span> <span className="font-mono">{r.value}</span>
-                        </div>
-                        <button
-                          type="button"
-                          className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                          onClick={() => copyToClipboard(r.value)}
-                        >Копировать</button>
+                        <div className="text-slate-700 dark:text-slate-200"><span>{r.label}</span> <span className="font-mono">{r.value}</span></div>
+                        <button type="button" className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700" onClick={()=>copyToClipboard(r.value)}>Копировать</button>
                       </div>
                     ))}
                   </div>
                 </div>
               </section>
 
-              {/* Информация и ссылка */}
+              {/* Инфо */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <p className="text-center text-slate-700 dark:text-slate-200">
                   Заказ сразу будет добавлен в очередь.
-                  <br />Если у вас появятся дополнительные вопросы, напишите мне:{" "}
-                  <a href="https://vk.com/markboostgta" target="_blank" rel="noreferrer" className="text-emerald-600 dark:text-emerald-300 underline">vk.com/markboostgta</a>
+                  <br/>Если у вас появятся дополнительные вопросы, напишите мне: <a href="https://vk.com/markboostgta" target="_blank" rel="noreferrer" className="text-emerald-600 dark:text-emerald-300 underline">vk.com/markboostgta</a>
                 </p>
               </section>
 
               {/* Кнопки */}
               <div className="flex flex-col sm:flex-row items-center gap-3">
-                <button
-                  type="submit"
-                  disabled={!canSubmit || submitting}
-                  className={`press px-6 py-3 rounded-2xl font-semibold shadow-lg transition
-                    ${canSubmit && !submitting
-                      ? "bg-emerald-500 text-white hover:bg-emerald-400"
-                      : "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"
-                    }`}
-                >
-                  {submitting ? "Отправка..." : "Предпросмотр и отправка"}
-                </button>
+                <button type="submit" disabled={!canSubmit||submitting} className={`press px-6 py-3 rounded-2xl font-semibold shadow-lg transition ${canSubmit && !submitting ? "bg-emerald-500 text-white hover:bg-emerald-400" : "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"}`}>{submitting ? "Отправка..." : "Предпросмотр и отправка"}</button>
                 {error && <span className="text-red-500 text-sm">{error}</span>}
                 {success && <span className="text-emerald-500 text-sm">{success}</span>}
               </div>
             </form>
           </div>
 
-          {/* Модалка предпросмотра с анимацией и размытием фона */}
+          {/* Модалка предпросмотра (scale + blur фона) */}
           {showPreview && (
             <div className="fixed inset-0 z-30 flex items-center justify-center">
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowPreview(false)} />
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={()=>setShowPreview(false)} />
               <div className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6 border border-slate-200 dark:border-slate-700 ${modalAnimClass}`}>
                 <h3 className="text-xl font-semibold mb-4">Проверьте данные перед отправкой</h3>
                 <div className="grid sm:grid-cols-2 gap-4 text-sm">
                   <div><span className="font-medium">Лаунчер:</span> {launcher}</div>
                   <div><span className="font-medium">Версия:</span> {version}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">{loginNeedsEmail ? "Почта" : "Логин"}:</span> {login}</div>
+                  <div className="sm:col-span-2"><span className="font-medium">{(launcher==="EpicGames"||launcher==="SocialClub")?"Почта":"Логин"}:</span> {login}</div>
                   <div><span className="font-medium">Валюта:</span> {money}</div>
                   <div><span className="font-medium">Уровень:</span> {level}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">Отдельные уровни:</span> {extraLevels.length ? extraLevels.join(", ") : "—"}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">🔓 Основные:</span> {mainUnlocks.length ? mainUnlocks.join(", ") : "—"}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">🔓 Дополнительно:</span> {extraUnlocks.length ? extraUnlocks.join(", ") : "—"}</div>
+                  <div className="sm:col-span-2"><span className="font-medium">Отдельные уровни:</span> {extraLevels.length?extraLevels.join(", "):"—"}</div>
+                  <div className="sm:col-span-2"><span className="font-medium">🔓 Основные:</span> {mainUnlocks.length?mainUnlocks.join(", "):"—"}</div>
+                  <div className="sm:col-span-2"><span className="font-medium">🔓 Дополнительно:</span> {extraUnlocks.length?extraUnlocks.join(", "):"—"}</div>
                   <div className="sm:col-span-2"><span className="font-medium">Контакты:</span> {contacts}</div>
                   <div><span className="font-medium">Оплата (последние 4):</span> **** {paymentLast4}</div>
                   <div><span className="font-medium">Способ оплаты:</span> {paymentMethod}</div>
                 </div>
 
                 <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                  <button
-                    type="button"
-                    className="press px-5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                    onClick={() => setShowPreview(false)}
-                  >Назад</button>
-                  <button
-                    type="button"
-                    className="press px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold"
-                    onClick={handleConfirmSubmit}
-                    disabled={submitting}
-                  >{submitting ? "Отправка..." : "Подтвердить и отправить"}</button>
+                  <button type="button" className="press px-5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700" onClick={()=>setShowPreview(false)}>Назад</button>
+                  <button type="button" className="press px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold" onClick={handleConfirmSubmit} disabled={submitting}>{submitting ? "Отправка..." : "Подтвердить и отправить"}</button>
                 </div>
               </div>
             </div>
