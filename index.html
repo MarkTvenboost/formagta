@@ -29,16 +29,16 @@
 <body class="h-full bg-slate-100 dark:bg-slate-900">
   <div id="root" class="h-full"></div>
 
-  <!-- ВАЖНО: пресеты для JSX -->
+  <!-- ВАЖНО: указываем пресеты для JSX -->
   <script type="text/babel" data-presets="env,react">
     /* ================= CONFIG ================= */
     const TRELLO_KEY     = "17bbfe1a2af1308027cbf9ee6d32c892";   // ← твой Trello API key
     const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   // ← твой Trello token
-    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   // ← ID списка
+    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   // ← ID списка Trello
 
     // Telegram Bot (для уведомлений)
     const TG_BOT_TOKEN = "";     // ← токен бота
-    const TG_CHAT_ID   = "";     // ← chat_id
+    const TG_CHAT_ID   = "";     // ← chat_id (твой)
 
     /* ================= Справочники ================= */
     const LAUNCHERS = [
@@ -52,7 +52,7 @@
       { value: "Legacy",   label: "Legacy" }
     ];
 
-    // Сокращённый список сумм (без цен)
+    // Сокращённый список сумм
     const MONEY_OPTIONS = [
       "25 млн","50 млн","75 млн",
       "100 млн","150 млн","190 млн",
@@ -77,13 +77,13 @@
       "Открыть косатку для покупки","Сменить пол персонажа"
     ];
 
-    // Реквизиты — в одну строку
+    // Реквизиты — в одну строку с кнопкой «Копировать»
     const REQUISITES = [
-      { label: "💚 Сбербанк — 2202 2032 9079 4421", copy: "2202203290794421" },
-      { label: "❤️ Альфа-Банк — 2200 1509 9435 5391", copy: "2200150994355391" },
-      { label: "💛 Т-Банк — 2200 7001 1816 8359", copy: "2200700118168359" },
-      { label: "🌐 Donatty — donatty.com/marktvenboost", copy: "donatty.com/marktvenboost" },
-      { label: "💛 ЮMoney — yoomoney.ru/to/410014747956154", copy: "yoomoney.ru/to/410014747956154" }
+      { label: "💚 Сбербанк — 2202 2032 9079 4421",              copy: "2202203290794421" },
+      { label: "❤️ Альфа-Банк — 2200 1509 9435 5391",            copy: "2200150994355391" },
+      { label: "💛 Т-Банк — 2200 7001 1816 8359",                 copy: "2200700118168359" },
+      { label: "🌐 Donatty — donatty.com/marktvenboost",          copy: "donatty.com/marktvenboost" },
+      { label: "💛 ЮMoney — yoomoney.ru/to/410014747956154",      copy: "yoomoney.ru/to/410014747956154" }
     ];
 
     /* ================= Утилиты ================= */
@@ -104,9 +104,30 @@
     }
 
     /* ================= Trello/Telegram helpers ================= */
-    async function trelloPOST(url,params){ const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN); Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v)); const r=await fetch(u.toString(),{method:"POST"}); if(!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function trelloPUT(url,params){ const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN); Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v)); const r=await fetch(u.toString(),{method:"PUT"}); if(!r.ok) throw new Error(await r.text()); return r.json(); }
-    async function sendTelegramMessage(text){ if(!TG_BOT_TOKEN||!TG_CHAT_ID) return; try{ const r=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:TG_CHAT_ID, text, parse_mode:"HTML", disable_web_page_preview:true }) }); if(!r.ok) console.warn("Telegram error:", await r.text()); }catch(e){ console.warn("Telegram send failed:", e?.message||e); } }
+    async function trelloPOST(url,params){
+      const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN);
+      Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
+      const r=await fetch(u.toString(),{method:"POST"});
+      if(!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+    async function trelloPUT(url,params){
+      const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN);
+      Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
+      const r=await fetch(u.toString(),{method:"PUT"});
+      if(!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+    async function sendTelegramMessage(text){
+      if(!TG_BOT_TOKEN||!TG_CHAT_ID) return;
+      try{
+        const r=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ chat_id:TG_CHAT_ID, text, parse_mode:"HTML", disable_web_page_preview:true })
+        });
+        if(!r.ok) console.warn("Telegram error:", await r.text());
+      }catch(e){ console.warn("Telegram send failed:", e?.message||e); }
+    }
 
     /* ================= Компонент ================= */
     function GTAOrderForm(){
@@ -121,8 +142,8 @@
 
       const [level,setLevel]       = React.useState("");
       const [extraLevels,setExtraLevels] = React.useState([]);
-      const [extraLevelInputs,setExtraLevelInputs] = React.useState({}); // значения уровней рядом с чекбоксами
-      const [mainUnlocks,setMainUnlocks] = React.useState([]);
+      const [extraLevelInputs,setExtraLevelInputs] = React.useState({}); // {label: "число"}
+      const [mainUnlocks,setMainUnlocks]   = React.useState([]);
       const [extraUnlocks,setExtraUnlocks] = React.useState([]);
 
       const [contacts,setContacts] = React.useState("");
@@ -137,40 +158,53 @@
 
       const loginNeedsEmail = launcher==="EpicGames" || launcher==="SocialClub";
 
-      // валидаторы
-      const levelIsValid = React.useMemo(()=>{ if(!level) return false; const n=Number(level); return Number.isInteger(n)&&n>=1&&n<=8000; },[level]);
+      // валидации
+      const levelIsValid = React.useMemo(()=>{
+        if(!level) return false; const n=Number(level);
+        return Number.isInteger(n)&&n>=1&&n<=8000;
+      },[level]);
+
       const last4IsValid = React.useMemo(()=>/^\d{4}$/.test(paymentLast4),[paymentLast4]);
-      const loginIsValid = React.useMemo(()=>{ if(!login.trim()) return false; return loginNeedsEmail ? emailRegex.test(login.trim()) : true; },[login,loginNeedsEmail]);
 
-      // прогресс-бар
+      const loginIsValid = React.useMemo(()=>{
+        if(!login.trim()) return false;
+        return loginNeedsEmail ? emailRegex.test(login.trim()) : true;
+      },[login,loginNeedsEmail]);
+
+      // прогресс-бар (плавно)
       const progress = React.useMemo(()=>{
-        const parts=[!!launcher,!!version,loginIsValid,!!password.trim(),levelIsValid,!!contacts.trim(),(money!==null||noMoney),last4IsValid,!!paymentMethod];
-        return Math.round(parts.filter(Boolean).length/parts.length*100);
-      },[launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,last4IsValid,paymentMethod]);
+        const parts = [
+          !!launcher, !!version, loginIsValid, !!password.trim(),
+          levelIsValid, !!contacts.trim(), (money!==null || noMoney),
+          last4IsValid, !!paymentMethod
+        ];
+        return Math.round(parts.filter(Boolean).length / parts.length * 100);
+      }, [launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,last4IsValid,paymentMethod]);
 
-      // можно отправлять
+      // готовность отправки
       const canSubmit = React.useMemo(()=>(
         launcher && version && loginIsValid && password.trim() &&
         levelIsValid && contacts.trim() && (money!==null || noMoney) &&
         last4IsValid && !!paymentMethod
       ),[launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,last4IsValid,paymentMethod]);
 
-      function toggleInArray(value, list, setter){
-        setter(list.includes(value) ? list.filter(x=>x!==value) : [...list,value]);
+      function toggleInArray(v, list, setter){
+        setter(list.includes(v) ? list.filter(x=>x!==v) : [...list, v]);
       }
 
-      // формат «Отдельные уровни»
+      // форматирование блока «Отдельные уровни»
       function formatExtraLevels(){
         if(!extraLevels.length) return "—";
-        return extraLevels.map(lbl=>{
-          const v=(extraLevelInputs[lbl]||"").trim();
+        return extraLevels.map(lbl => {
+          const v = (extraLevelInputs[lbl] || "").trim();
           return v ? `${lbl}: ${v}` : lbl;
         }).join(", ");
       }
 
-      // Trello + Telegram
+      // Отправка в Trello/Telegram
       async function createTrelloCard(){
         const title = `ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`;
+
         const descLines = [
           `Лаунчер: ${launcher}`,
           `Версия: ${version}`,
@@ -187,12 +221,15 @@
           `Источник: форма заявки`
         ];
 
-        const card = await trelloPOST("https://api.trello.com/1/cards",{
-          idList:TRELLO_LIST_ID, name:title, desc:descLines.join("\n")
+        const card = await trelloPOST("https://api.trello.com/1/cards", {
+          idList: TRELLO_LIST_ID,
+          name: title,
+          desc: descLines.join("\n")
         });
 
         const checklist = await trelloPOST(`https://api.trello.com/1/cards/${card.id}/checklists`,{ name:"Ответы заявки" });
-        let idx=1;
+
+        let idx = 1;
         const items = [
           `Лаунчер: ${launcher}`,
           `Версия: ${version}`,
@@ -206,15 +243,15 @@
           `Подтверждение оплаты: **** ${paymentLast4}`,
           `Способ оплаты: ${paymentMethod}`,
           `Контакты: ${contacts}`
-        ].map(t=>`${idx++}. ${t}`);
+        ].map(t => `${idx++}. ${t}`);
 
         for(const text of items){
-          await trelloPOST(`https://api.trello.com/1/checklists/${checklist.id}/checkItems`,{ name:text });
+          await trelloPOST(`https://api.trello.com/1/checklists/${checklist.id}/checkItems`,{ name: text });
         }
 
         if(card.idShort){
           await trelloPUT(`https://api.trello.com/1/cards/${card.id}/name`,{
-            value:`#${card.idShort} ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`
+            value: `#${card.idShort} ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`
           });
         }
 
@@ -260,7 +297,10 @@
         }finally{ setSubmitting(false); }
       }
 
-      React.useEffect(()=>{ if(showPreview){ requestAnimationFrame(()=>setModalAnimClass("modal-enter-active")); } else { setModalAnimClass("modal-enter"); } },[showPreview]);
+      React.useEffect(()=>{
+        if(showPreview){ requestAnimationFrame(()=>setModalAnimClass("modal-enter-active")); }
+        else { setModalAnimClass("modal-enter"); }
+      },[showPreview]);
 
       const currentLauncher = LAUNCHERS.find(l=>l.value===launcher);
 
@@ -334,10 +374,10 @@
                     <label className="block text-sm font-medium mb-1">{(launcher==="EpicGames"||launcher==="SocialClub")?"Почта":"Логин"} <Req/></label>
                     <input
                       type={(launcher==="EpicGames"||launcher==="SocialClub")?"email":"text"}
-                      className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${(!(loginNeedsEmail?emailRegex.test(login.trim()):!!login.trim()) && login) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
+                      className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${(!loginIsValid && login) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
                       placeholder={(launcher==="EpicGames"||launcher==="SocialClub")?"email@example.com":"Введите логин"}
                       value={login}
-                      onChange={(e)=>{let v=e.target.value.trim(); if(launcher==="EpicGames"||launcher==="SocialClub") v=v.toLowerCase(); setLogin(v);}}
+                      onChange={(e)=>{ let v=e.target.value.trim(); if(launcher==="EpicGames"||launcher==="SocialClub") v=v.toLowerCase(); setLogin(v); }}
                       required
                     />
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Steam — логин | Epic — почта | Rockstar — почта от SocialClub</p>
@@ -350,10 +390,9 @@
                 </div>
               </section>
 
-              {/* Валюта (без цен) */}
+              {/* Валюта */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">💰 Количество игровой валюты</h2>
-
                 <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 ${noMoney ? "opacity-50 pointer-events-none" : ""}`}>
                   {MONEY_OPTIONS.map(opt=>{
                     const active = money===opt;
@@ -365,54 +404,63 @@
                     );
                   })}
                 </div>
-
                 <div className="mt-4 flex items-center gap-2">
                   <input id="noMoney" type="checkbox" className="h-4 w-4 accent-emerald-500"
                     checked={noMoney}
                     onChange={(e)=>{ const v=e.target.checked; setNoMoney(v); if(v) setMoney(null); }} />
                   <label htmlFor="noMoney" className="text-sm select-none">Без игровой валюты — только услуги (разблокировки/уровни)</label>
                 </div>
-
                 {money===null && !noMoney && <p className="mt-2 text-xs text-red-500">Выберите сумму или включите «Без игровой валюты».</p>}
               </section>
 
               {/* Какой уровень персонажа сделать? */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <label className="block text-sm font-medium mb-1">Какой уровень персонажа сделать? <Req/></label>
-                <input type="number" min="1" max="8000"
+                <input
+                  type="number" min="1" max="8000"
                   className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${level && !(Number.isInteger(Number(level)) && Number(level)>=1 && Number(level)<=8000) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                  placeholder="Например: 500" value={level}
-                  onChange={(e)=>setLevel(e.target.value.replace(/[^\d]/g,'').slice(0,4))} required />
+                  placeholder="Например: 500"
+                  value={level}
+                  onChange={(e)=>setLevel(e.target.value.replace(/[^\d]/g,'').slice(0,4))}
+                  required
+                />
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">от 1 до 8000</p>
               </section>
 
-              {/* Отдельные уровни с инпутами */}
+              {/* Отдельные уровни — с полем для ввода уровня при выборе */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <h2 className="text-lg font-semibold mb-3">Отдельные уровни</h2>
                 <div className="space-y-3">
-                  {EXTRA_LEVELS.map(label=>{
+                  {EXTRA_LEVELS.map((label)=>{
                     const checked = extraLevels.includes(label);
                     const defaultHint = (label.match(/\d{2,4}/)?.[0]) || "";
                     const value = extraLevelInputs[label] ?? "";
                     return (
                       <div key={label} className="flex items-center gap-3">
                         <label className="press flex items-center gap-3 cursor-pointer flex-1">
-                          <input type="checkbox" className="h-4 w-4 accent-emerald-500" checked={checked}
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 accent-emerald-500"
+                            checked={checked}
                             onChange={()=>{
-                              setExtraLevels(checked ? extraLevels.filter(x=>x!==label) : [...extraLevels,label]);
+                              setExtraLevels(checked ? extraLevels.filter(x=>x!==label) : [...extraLevels, label]);
                               if(checked){
                                 setExtraLevelInputs(prev=>{ const c={...prev}; delete c[label]; return c; });
                               }else{
                                 setExtraLevelInputs(prev=>({ ...prev, [label]: prev[label] ?? "" }));
                               }
-                            }} />
+                            }}
+                          />
                           <span>{label}</span>
                         </label>
                         {checked && (
-                          <input type="number" min="1" max="8000" inputMode="numeric" placeholder={defaultHint || "уровень"}
+                          <input
+                            type="number" min="1" max="8000" inputMode="numeric"
+                            placeholder={defaultHint || "уровень"}
                             className="w-28 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-1.5 outline-none focus:border-emerald-400 transition text-sm"
                             value={value}
-                            onChange={(e)=>{ const v=e.target.value.replace(/[^\d]/g,"").slice(0,4); setExtraLevelInputs(prev=>({ ...prev, [label]: v })); }} />
+                            onChange={(e)=>{ const v=e.target.value.replace(/[^\d]/g,"").slice(0,4); setExtraLevelInputs(prev=>({ ...prev, [label]: v })); }}
+                          />
                         )}
                       </div>
                     );
@@ -427,9 +475,12 @@
                 <div className="space-y-2">
                   {UNLOCKS_MAIN.map(label=>(
                     <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="h-4 w-4 accent-emerald-500"
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-emerald-500"
                         checked={mainUnlocks.includes(label)}
-                        onChange={()=>toggleInArray(label,mainUnlocks,setMainUnlocks)} />
+                        onChange={()=>toggleInArray(label, mainUnlocks, setMainUnlocks)}
+                      />
                       <span>{label}</span>
                     </label>
                   ))}
@@ -442,9 +493,12 @@
                 <div className="space-y-2">
                   {UNLOCKS_EXTRA.map(label=>(
                     <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input type="checkbox" className="h-4 w-4 accent-emerald-500"
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-emerald-500"
                         checked={extraUnlocks.includes(label)}
-                        onChange={()=>toggleInArray(label,extraUnlocks,setExtraUnlocks)} />
+                        onChange={()=>toggleInArray(label, extraUnlocks, setExtraUnlocks)}
+                      />
                       <span>{label}</span>
                     </label>
                   ))}
@@ -454,7 +508,14 @@
               {/* Контакты */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <label className="block text-sm font-medium mb-1">Контакты для связи <Req/></label>
-                <input type="text" className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition" placeholder="Укажите ссылку на ваш VK или Telegram" value={contacts} onChange={(e)=>setContacts(e.target.value.trim())} required />
+                <input
+                  type="text"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition"
+                  placeholder="Укажите ссылку на ваш VK или Telegram"
+                  value={contacts}
+                  onChange={(e)=>setContacts(e.target.value.trim())}
+                  required
+                />
               </section>
 
               {/* Подтверждение оплаты */}
@@ -462,10 +523,18 @@
                 <label htmlFor="paymentLast4" className="block text-sm font-medium">Подтверждение оплаты <Req/></label>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Укажите последние 4 цифры карты и выберите способ оплаты</p>
                 <div className="flex items-center gap-3">
-                  <input id="paymentLast4" inputMode="numeric" autoComplete="off" maxLength="4" pattern="\d{4}" required placeholder="1234"
+                  <input
+                    id="paymentLast4" inputMode="numeric" autoComplete="off" maxLength="4" pattern="\d{4}" required placeholder="1234"
                     className={`w-24 rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-3 py-2 text-center tracking-widest outline-none transition ${paymentLast4 && !last4IsValid ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                    value={paymentLast4} onChange={(e)=>setPaymentLast4(e.target.value.replace(/\D/g,"").slice(0,4))} />
-                  <select id="paymentMethod" required className="flex-1 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-2 outline-none focus:border-emerald-400 transition" value={paymentMethod} onChange={(e)=>setPaymentMethod(e.target.value)}>
+                    value={paymentLast4}
+                    onChange={(e)=>setPaymentLast4(e.target.value.replace(/\D/g,"").slice(0,4))}
+                  />
+                  <select
+                    id="paymentMethod" required
+                    className="flex-1 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-2 outline-none focus:border-emerald-400 transition"
+                    value={paymentMethod}
+                    onChange={(e)=>setPaymentMethod(e.target.value)}
+                  >
                     <option value="" disabled>Выберите способ оплаты</option>
                     <option>Сбербанк — 2202 2032 9079 4421</option>
                     <option>Альфа-Банк — 2200 1509 9435 5391</option>
@@ -477,14 +546,18 @@
                 <p className="text-xs text-red-500 mt-2">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
               </section>
 
-              {/* Реквизиты — в одну строку с кнопкой */}
+              {/* Реквизиты — в одну строку */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow-inner p-6 border border-slate-200 dark:border-slate-700">
                 <h3 className="text-center text-lg font-semibold mb-4">Реквизиты для перевода:</h3>
                 <div className="max-w-2xl mx-auto space-y-2">
                   {REQUISITES.map((r,i)=>(
                     <div key={i} className="flex items-center justify-between gap-3 whitespace-nowrap">
                       <span className="overflow-hidden text-ellipsis">{r.label}</span>
-                      <button type="button" className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700" onClick={()=>copyToClipboard(r.copy)}>Копировать</button>
+                      <button
+                        type="button"
+                        className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                        onClick={()=>copyToClipboard(r.copy)}
+                      >Копировать</button>
                     </div>
                   ))}
                 </div>
@@ -492,8 +565,11 @@
 
               {/* Кнопки */}
               <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
-                <button type="submit" disabled={!canSubmit||submitting}
-                  className={`press px-6 py-3 rounded-2xl font-semibold shadow-lg transition ${canSubmit&&!submitting ? "bg-emerald-500 text-white hover:bg-emerald-400" : "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"}`}>
+                <button
+                  type="submit"
+                  disabled={!canSubmit||submitting}
+                  className={`press px-6 py-3 rounded-2xl font-semibold shadow-lg transition ${canSubmit&&!submitting ? "bg-emerald-500 text-white hover:bg-emerald-400" : "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"}`}
+                >
                   {submitting ? "Отправка..." : "Предпросмотр и отправка"}
                 </button>
                 {error && <span className="text-red-500 text-sm">{error}</span>}
