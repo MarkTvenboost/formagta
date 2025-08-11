@@ -52,7 +52,6 @@
       { value: "Legacy",   label: "Legacy" }
     ];
 
-    // Сокращённый список сумм
     const MONEY_OPTIONS = [
       "25 млн","50 млн","75 млн",
       "100 млн","150 млн","190 млн",
@@ -77,13 +76,13 @@
       "Открыть косатку для покупки",
     ];
 
-    // Реквизиты — в одну строку с кнопкой «Копировать»
+    // Реквизиты — теперь изначально показываем только название, цифры/ссылку скрываем до клика
     const REQUISITES = [
-      { label: "💚 Сбербанк — 2202 2032 9079 4421",              copy: "2202203290794421" },
-      { label: "❤️ Альфа-Банк — 2200 1509 9435 5391",            copy: "2200150994355391" },
-      { label: "💛 Т-Банк — 2200 7001 1816 8359",                 copy: "2200700118168359" },
-      { label: "🌐 Donatty — donatty.com/marktvenboost",          copy: "donatty.com/marktvenboost" },
-      { label: "💛 ЮMoney — yoomoney.ru/to/410014747956154",      copy: "yoomoney.ru/to/410014747956154" }
+      { name: "💚 Сбербанк",   number: "2202 2032 9079 4421" },
+      { name: "❤️ Альфа-Банк", number: "2200 1509 9435 5391" },
+      { name: "💛 Т-Банк",     number: "2200 7001 1816 8359" },
+      { name: "🌐 Donatty",    url: "donatty.com/marktvenboost" },
+      { name: "💛 ЮMoney",     url: "yoomoney.ru/to/410014747956154" }
     ];
 
     /* ================= Утилиты ================= */
@@ -156,6 +155,9 @@
       const [showPreview,setShowPreview] = React.useState(false);
       const [modalAnimClass,setModalAnimClass] = React.useState("modal-enter");
 
+      // для «клик-для-показа» реквизитов
+      const [revealedRequisites, setRevealedRequisites] = React.useState({}); // {index: true}
+
       const loginNeedsEmail = launcher==="EpicGames" || launcher==="SocialClub";
 
       // валидации
@@ -216,7 +218,7 @@
           `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
           `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
           `Подтверждение оплаты: **** ${paymentLast4}`,
-          `Способ оплаты: ${paymentMethod}`,
+          `Способ оплаты: ${paymentMethod}`, // теперь только названия
           `Контакты: ${contacts}`,
           `Источник: форма заявки`
         ];
@@ -241,7 +243,7 @@
           `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
           `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
           `Подтверждение оплаты: **** ${paymentLast4}`,
-          `Способ оплаты: ${paymentMethod}`,
+          `Способ оплаты: ${paymentMethod}`, // только названия
           `Контакты: ${contacts}`
         ].map(t => `${idx++}. ${t}`);
 
@@ -292,6 +294,7 @@
           setLevel(""); setExtraLevels([]); setExtraLevelInputs({});
           setMainUnlocks([]); setExtraUnlocks([]);
           setContacts(""); setPaymentLast4(""); setPaymentMethod("");
+          setRevealedRequisites({});
         }catch(err){
           console.error(err); setError(err.message || "Ошибка при отправке");
         }finally{ setSubmitting(false); }
@@ -521,7 +524,9 @@
               {/* Подтверждение оплаты */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <label htmlFor="paymentLast4" className="block text-sm font-medium">Подтверждение оплаты <Req/></label>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Укажите последние 4 цифры карты и выберите способ оплаты</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                  Укажите последние 4 цифры карты и выберите банк/сервис. Номера карт в способе оплаты скрыты.
+                </p>
                 <div className="flex items-center gap-3">
                   <input
                     id="paymentLast4" inputMode="numeric" autoComplete="off" maxLength="4" pattern="\d{4}" required placeholder="1234"
@@ -536,30 +541,59 @@
                     onChange={(e)=>setPaymentMethod(e.target.value)}
                   >
                     <option value="" disabled>Выберите способ оплаты</option>
-                    <option>Сбербанк — 2202 2032 9079 4421</option>
-                    <option>Альфа-Банк — 2200 1509 9435 5391</option>
-                    <option>Т-Банк — 2200 7001 1816 8359</option>
-                    <option>Donatty — donatty.com/marktvenboost</option>
-                    <option>ЮMoney — yoomoney.ru/to/410014747956154</option>
+                    <option>Сбербанк</option>
+                    <option>Альфа-Банк</option>
+                    <option>Т-Банк</option>
+                    <option>Donatty</option>
+                    <option>ЮMoney</option>
                   </select>
                 </div>
                 <p className="text-xs text-red-500 mt-2">ВНИМАНИЕ: Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
               </section>
 
-              {/* Реквизиты — в одну строку */}
+              {/* Реквизиты — скрыты до клика */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow-inner p-6 border border-slate-200 dark:border-slate-700">
                 <h3 className="text-center text-lg font-semibold mb-4">Реквизиты для перевода:</h3>
-                <div className="max-w-2xl mx-auto space-y-2">
-                  {REQUISITES.map((r,i)=>(
-                    <div key={i} className="flex items-center justify-between gap-3 whitespace-nowrap">
-                      <span className="overflow-hidden text-ellipsis">{r.label}</span>
-                      <button
-                        type="button"
-                        className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                        onClick={()=>copyToClipboard(r.copy)}
-                      >Копировать</button>
-                    </div>
-                  ))}
+                <div className="max-w-2xl mx-auto space-y-3">
+                  {REQUISITES.map((r,i)=>{
+                    const isRevealed = !!revealedRequisites[i];
+                    const canCopy = r.number || r.url;
+                    const valueToCopy = r.number || r.url || "";
+                    return (
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{r.name}</span>
+                          {!isRevealed && <span className="text-xs text-slate-500 dark:text-slate-400">(скрыто)</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!isRevealed ? (
+                            <button
+                              type="button"
+                              className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                              onClick={() => setRevealedRequisites(prev => ({ ...prev, [i]: true }))}
+                            >
+                              Показать
+                            </button>
+                          ) : (
+                            <>
+                              <span className="text-sm overflow-hidden text-ellipsis">
+                                {r.number ? r.number : r.url}
+                              </span>
+                              {canCopy && (
+                                <button
+                                  type="button"
+                                  className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                                  onClick={()=>copyToClipboard(valueToCopy)}
+                                >
+                                  Копировать
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </section>
 
