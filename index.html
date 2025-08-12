@@ -36,7 +36,7 @@
     const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   // ← твой Trello token
     const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   // ← ID списка Trello
 
-    // Telegram Bot (для уведомлений) — можно оставить пустым
+    // Telegram Bot (для уведомлений)
     const TG_BOT_TOKEN = "6035113933:AAHJ7HebPU89cXqAGdBThDk6MglwMpZD3hw";     // ← токен бота
     const TG_CHAT_ID   = "1039921677";     // ← chat_id (твой)
 
@@ -148,8 +148,9 @@
 
       const [contacts,setContacts] = React.useState("");
 
-      // ➜ Новый блок выбора банка (вместо подтверждения оплаты)
+      // ➜ Новый блок выбора банка и времени платежа
       const [bank,setBank] = React.useState(""); // хранит label из REQUISITES
+      const [paymentTime,setPaymentTime] = React.useState(""); // произвольный текст (примерное время)
       const [showRequisites,setShowRequisites] = React.useState(false);
 
       const [submitting,setSubmitting] = React.useState(false);
@@ -171,15 +172,15 @@
         return loginNeedsEmail ? emailRegex.test(login.trim()) : true;
       },[login,loginNeedsEmail]);
 
-      // прогресс-бар
+      // прогресс-бар (учитываем банк и время платежа)
       const progress = React.useMemo(()=>{
         const parts = [
           !!launcher, !!version, loginIsValid, !!password.trim(),
           levelIsValid, !!contacts.trim(), (money!==null || noMoney),
-          !!bank // банк обязателен
+          !!bank, !!paymentTime.trim()
         ];
         return Math.round(parts.filter(Boolean).length / parts.length * 100);
-      }, [launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,bank]);
+      }, [launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,bank,paymentTime]);
 
       // готовность отправки
       const canSubmit = React.useMemo(()=>(progress===100),[progress]);
@@ -205,13 +206,14 @@
           `Лаунчер: ${launcher}`,
           `Версия: ${version}`,
           `Логин: ${login}`,
-          `Пароль: ${password}`, // НЕ скрываем
+          `Пароль: ${password}`,
           `Игровая валюта: ${noMoney ? "— (без валюты)" : (money ?? "не выбрано")}`,
           `Уровень персонажа: ${level}`,
           `Отдельные уровни: ${formatExtraLevels()}`,
           `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
           `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
           `Банк для оплаты: ${bank || "—"}`,
+          `Время платежа (примерно): ${paymentTime || "—"}`,
           `Контакты: ${contacts}`,
           `Источник: форма заявки`
         ];
@@ -236,6 +238,7 @@
           `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
           `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
           `Банк для оплаты: ${bank || "—"}`,
+          `Время платежа (примерно): ${paymentTime || "—"}`,
           `Контакты: ${contacts}`
         ].map(t => `${idx++}. ${t}`);
 
@@ -254,6 +257,7 @@
           `Лаунчер: ${launcher}\nВерсия: ${version}\n`+
           `Валюта: ${noMoney ? "—" : (money ?? "—")} | Уровень: ${level}\n`+
           `Банк: ${bank || "—"}\n`+
+          `Время платежа (≈): ${paymentTime || "—"}\n`+
           `Контакты: ${contacts}`
         );
 
@@ -286,7 +290,7 @@
           setMoney(null); setNoMoney(false);
           setLevel(""); setExtraLevels([]); setExtraLevelInputs({});
           setMainUnlocks([]); setExtraUnlocks([]);
-          setContacts(""); setBank("");
+          setContacts(""); setBank(""); setPaymentTime("");
           setShowRequisites(false);
         }catch(err){
           console.error(err); setError(err.message || "Ошибка при отправке");
@@ -514,7 +518,7 @@
                 />
               </section>
 
-              {/* 10. Выбор банка (новый блок вместо «Подтверждение оплаты») */}
+              {/* 10. Выбор банка + время платежа */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <label htmlFor="bankSelect" className="block text-sm font-medium">Выбор банка для оплаты <Req/></label>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Выберите один из доступных вариантов.</p>
@@ -527,7 +531,20 @@
                   <option value="" disabled>Выберите банк/сервис</option>
                   {REQUISITES.map((r,i)=>(<option key={i} value={r.label}>{r.label}</option>))}
                 </select>
-                {!bank && <p className="text-xs text-red-500 mt-2">Пожалуйста, выберите банк/сервис для оплаты.</p>}
+
+                <div className="mt-4">
+                  <label htmlFor="paymentTime" className="block text-sm font-medium">Время платежа (примерно) <Req/></label>
+                  <input
+                    id="paymentTime"
+                    type="text"
+                    required
+                    className="mt-1 w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-2 outline-none focus:border-emerald-400 transition"
+                    placeholder="Например: сегодня ~18:00–20:00, или завтра утром"
+                    value={paymentTime}
+                    onChange={(e)=>setPaymentTime(e.target.value)}
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Можно указать диапазон или примерную формулировку: «сегодня после 19:00», «завтра днём», «в выходные».</p>
+                </div>
               </section>
 
               {/* Реквизиты — скрытые, раскрываются по кнопке */}
@@ -592,6 +609,7 @@
                   <div className="sm:col-span-2"><span className="font-medium">🔓 Дополнительно:</span> {extraUnlocks.length?extraUnlocks.join(", "):"—"}</div>
                   <div className="sm:col-span-2"><span className="font-medium">Контакты:</span> {contacts}</div>
                   <div className="sm:col-span-2"><span className="font-medium">Банк для оплаты:</span> {bank || "—"}</div>
+                  <div className="sm:col-span-2"><span className="font-medium">Время платежа (примерно):</span> {paymentTime || "—"}</div>
                 </div>
 
                 <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
