@@ -1,3 +1,6 @@
+Вот полный файл с нужными изменениями: выбор банка + «Время платежа (примерно)» и показ/копирование реквизитов внутри этого же блока. Отдельного нижнего блока с реквизитами больше нет.
+
+```html
 <!DOCTYPE html>
 <html lang="ru" class="h-full">
 <head>
@@ -36,7 +39,7 @@
     const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   // ← твой Trello token
     const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   // ← ID списка Trello
 
-    // Telegram Bot (для уведомлений)
+    // Telegram Bot (для уведомлений) — можно оставить пустым
     const TG_BOT_TOKEN = "6035113933:AAHJ7HebPU89cXqAGdBThDk6MglwMpZD3hw";     // ← токен бота
     const TG_CHAT_ID   = "1039921677";     // ← chat_id (твой)
 
@@ -149,9 +152,9 @@
       const [contacts,setContacts] = React.useState("");
 
       // ➜ Новый блок выбора банка и времени платежа
-      const [bank,setBank] = React.useState(""); // хранит label из REQUISITES
+      const [bank,setBank] = React.useState("");           // хранит label из REQUISITES
       const [paymentTime,setPaymentTime] = React.useState(""); // произвольный текст (примерное время)
-      const [showRequisites,setShowRequisites] = React.useState(false);
+      const [showRequisites,setShowRequisites] = React.useState(false); // показать/скрыть список реквизитов
 
       const [submitting,setSubmitting] = React.useState(false);
       const [error,setError] = React.useState(null);
@@ -172,7 +175,7 @@
         return loginNeedsEmail ? emailRegex.test(login.trim()) : true;
       },[login,loginNeedsEmail]);
 
-      // прогресс-бар (учитываем банк и время платежа)
+      // прогресс-бар: требуем выбрать банк и указать прим. время платежа
       const progress = React.useMemo(()=>{
         const parts = [
           !!launcher, !!version, loginIsValid, !!password.trim(),
@@ -183,7 +186,7 @@
       }, [launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,bank,paymentTime]);
 
       // готовность отправки
-      const canSubmit = React.useMemo(()=>(progress===100),[progress]);
+      const canSubmit = progress===100;
 
       function toggleInArray(v, list, setter){
         setter(list.includes(v) ? list.filter(x=>x!==v) : [...list, v]);
@@ -206,7 +209,7 @@
           `Лаунчер: ${launcher}`,
           `Версия: ${version}`,
           `Логин: ${login}`,
-          `Пароль: ${password}`,
+          `Пароль: ${password}`, // НЕ скрываем
           `Игровая валюта: ${noMoney ? "— (без валюты)" : (money ?? "не выбрано")}`,
           `Уровень персонажа: ${level}`,
           `Отдельные уровни: ${formatExtraLevels()}`,
@@ -518,7 +521,7 @@
                 />
               </section>
 
-              {/* 10. Выбор банка + время платежа */}
+              {/* 10. Выбор банка + время платежа + кнопка показать реквизиты */}
               <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
                 <label htmlFor="bankSelect" className="block text-sm font-medium">Выбор банка для оплаты <Req/></label>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Выберите один из доступных вариантов.</p>
@@ -545,12 +548,8 @@
                   />
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Можно указать диапазон или примерную формулировку: «сегодня после 19:00», «завтра днём», «в выходные».</p>
                 </div>
-              </section>
 
-              {/* Реквизиты — скрытые, раскрываются по кнопке */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow-inner p-6 border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Реквизиты для перевода</h3>
+                <div className="mt-5">
                   <button
                     type="button"
                     className="press text-sm px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
@@ -558,23 +557,23 @@
                   >
                     {showRequisites ? "Скрыть реквизиты" : "Показать реквизиты"}
                   </button>
-                </div>
 
-                {showRequisites && (
-                  <div className="mt-4 max-w-2xl mx-auto space-y-2">
-                    {REQUISITES.map((r,i)=>(
-                      <div key={i} className="flex items-center justify-between gap-3 whitespace-nowrap">
-                        <span className="overflow-hidden text-ellipsis">{r.label}</span>
-                        <button
-                          type="button"
-                          className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                          onClick={()=>copyToClipboard(r.copy)}
-                        >Копировать</button>
-                      </div>
-                    ))}
-                    <p className="text-xs text-red-500 mt-2">Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
-                  </div>
-                )}
+                  {showRequisites && (
+                    <div className="mt-4 max-w-2xl space-y-2">
+                      {REQUISITES.map((r,i)=>(
+                        <div key={i} className="flex items-center justify-between gap-3 whitespace-nowrap">
+                          <span className="overflow-hidden text-ellipsis">{r.label}</span>
+                          <button
+                            type="button"
+                            className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                            onClick={()=>copyToClipboard(r.copy)}
+                          >Копировать</button>
+                        </div>
+                      ))}
+                      <p className="text-xs text-red-500 mt-2">Никогда не указывайте полный номер карты, CVC-код или срок действия!</p>
+                    </div>
+                  )}
+                </div>
               </section>
 
               {/* Кнопки */}
@@ -627,3 +626,4 @@
   </script>
 </body>
 </html>
+```
