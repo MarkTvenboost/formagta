@@ -31,10 +31,9 @@
 
   <!-- ВАЖНО: указываем пресеты для JSX -->
   <script type="text/babel" data-presets="env,react">
-    /* ================= CONFIG ================= */
-    const TRELLO_KEY     = "17bbfe1a2af1308027cbf9ee6d32c892";   // ← твой Trello API key
-    const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   // ← твой Trello token
-    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   // ← ID списка Trello
+    const TRELLO_KEY     = "17bbfe1a2af1308027cbf9ee6d32c892";   
+    const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   
+    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   
 
     const LAUNCHERS = [
       { value: "Steam",      label: "Steam",                 logo: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" },
@@ -79,15 +78,9 @@
       { name: "💛 ЮMoney",     url: "yoomoney.ru/to/410014747956154" }
     ];
 
-    /* ================= Утилиты ================= */
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-    const Req = () => <span className="text-red-500">*</span>;
 
-    function copyToClipboard(text){
-      if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(text).catch(fallback); }
-      else fallback();
-      function fallback(){ const t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
-    }
+    const Req = () => <span className="text-red-500">*</span>;
 
     function useTheme(){
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -96,7 +89,12 @@
       return [dark,setDark];
     }
 
-    /* ================= Trello helpers ================= */
+    function copyToClipboard(text){
+      if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(text).catch(fallback); }
+      else fallback();
+      function fallback(){ const t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+    }
+
     async function trelloPOST(url,params){
       const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN);
       Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
@@ -116,7 +114,6 @@
       }catch(e){ console.warn("Telegram send failed:", e?.message||e); }
     }
 
-    /* ================= Компонент ================= */
     function GTAOrderForm(){
       const [dark,setDark] = useTheme();
 
@@ -145,7 +142,6 @@
 
       const loginNeedsEmail = launcher==="EpicGames" || launcher==="SocialClub";
 
-      // прогресс-бар
       const progress = React.useMemo(() => (
         !!launcher && !!version && login.trim() && password.trim() && 
         (money !== null || noMoney) && level && contacts.trim()
@@ -200,7 +196,7 @@
         if(!window.confetti) return;
         const duration = 1300, end = Date.now() + duration;
         (function frame() {
-          window.confetti({particleCount: 3, angle: 60, spread: 60, origin: {x: 0, y: 0.8}});
+          window.confetti({particleCount: 3, angle: 60, spread: 60, origin: {x: 0, y: 0.8}}); 
           window.confetti({particleCount: 3, angle: 120, spread: 60, origin: {x: 1, y: 0.8}});
           if (Date.now() < end) requestAnimationFrame(frame);
         })();
@@ -214,7 +210,6 @@
           setShowPreview(false);
           fireConfetti();
 
-          // сброс формы
           setLauncher(LAUNCHERS[0].value);
           setVersion(GAME_VERSIONS[0].value);
           setLogin(""); setPassword("");
@@ -405,40 +400,23 @@
                 <h3 className="text-center text-lg font-semibold mb-4">Реквизиты для перевода:</h3>
                 <div className="max-w-2xl mx-auto space-y-3">
                   {REQUISITES.map((r,i)=>{
-                    const isRevealed = !!revealedRequisites[i];
-                    const canCopy = r.number || r.url;
-                    const valueToCopy = r.number || r.url || "";
+
                     return (
                       <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{r.name}</span>
-                          {!isRevealed && <span className="text-xs text-slate-500 dark:text-slate-400">(скрыто)</span>}
                         </div>
                         <div className="flex items-center gap-2">
-                          {!isRevealed ? (
-                            <button
-                              type="button"
-                              className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                              onClick={() => setRevealedRequisites(prev => ({ ...prev, [i]: true }))}
-                            >
-                              Показать
-                            </button>
-                          ) : (
-                            <>
-                              <span className="text-sm overflow-hidden text-ellipsis">
-                                {r.number ? r.number : r.url}
-                              </span>
-                              {canCopy && (
-                                <button
-                                  type="button"
-                                  className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                                  onClick={()=>copyToClipboard(valueToCopy)}
-                                >
-                                  Копировать
-                                </button>
-                              )}
-                            </>
-                          )}
+                          <span className="text-sm overflow-hidden text-ellipsis">
+                            {r.number ? r.number : r.url}
+                          </span>
+                          <button
+                            type="button"
+                            className="press text-xs px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
+                            onClick={()=>copyToClipboard(r.number || r.url)}
+                          >
+                            Копировать
+                          </button>
                         </div>
                       </div>
                     );
