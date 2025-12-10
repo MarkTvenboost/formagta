@@ -1,108 +1,167 @@
 <!DOCTYPE html>
-<html lang="ru" class="h-full">
+<html lang="ru" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ПРОКАЧКА GTA ONLINE — Заявка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTA ONLINE BOOST — Level Up Your Game</title>
 
-  <!-- Tailwind (dark mode через class) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config = { darkMode: 'class' };</script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Rajdhani', 'sans-serif'],
+          },
+          colors: {
+            gta: {
+              green: '#2ecc71',
+              dark: '#0f172a',
+              card: '#1e293b',
+            }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    };
+  </script>
 
-  <!-- React 18 UMD -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
-  <!-- Babel для JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Конфетти -->
+  
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    .press { transition: transform .06s ease; }
-    .press:active { transform: scale(0.98); }
-    .modal-enter { opacity: 0; transform: scale(0.96); }
-    .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity .18s ease, transform .18s ease; }
+    body {
+      background-color: #0f172a; /* Dark base */
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2ecc71; }
+
+    /* Glassmorphism utilities */
+    .glass {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    .glass-input:focus {
+      border-color: #2ecc71;
+      box-shadow: 0 0 15px rgba(46, 204, 113, 0.2);
+    }
+
+    /* Animations */
+    .press-effect:active { transform: scale(0.97); }
+    .hover-glow:hover { box-shadow: 0 0 20px rgba(46, 204, 113, 0.15); border-color: rgba(46, 204, 113, 0.5); }
+    
+    /* Background Mesh Gradient */
+    .bg-mesh {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: -1;
+      background: 
+        radial-gradient(at 0% 0%, hsla(153,47%,20%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 100%, hsla(260,50%,15%,1) 0, transparent 50%),
+        radial-gradient(at 50% 50%, #0f172a 0, #020617 100%);
+    }
   </style>
 </head>
-<body class="h-full bg-slate-100 dark:bg-slate-900">
-  <div id="root" class="h-full"></div>
+<body>
+  <div class="bg-mesh"></div>
+  
+  <div id="root"></div>
 
-  <!-- ВАЖНО: указываем пресеты для JSX -->
   <script type="text/babel" data-presets="env,react">
-    /* ================= CONFIG ================= */
-    const TRELLO_KEY     = "17bbfe1a2af1308027cbf9ee6d32c892";   // ← твой Trello API key
-    const TRELLO_TOKEN   = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   // ← твой Trello token
-    const TRELLO_LIST_ID = "685fbecf9de5902f7c319e31";   // ← ID списка Trello
-
-    // Telegram Bot (для уведомлений)
-    const TG_BOT_TOKEN = "6035113933:AAHJ7HebPU89cXqAGdBThDk6MglwMpZD3hw";
-    const TG_CHAT_ID   = "1039921677";
+    /* ================= CONFIG (Твои ключи) ================= */
+    const TRELLO_KEY       = "17bbfe1a2af1308027cbf9ee6d32c892";   
+    const TRELLO_TOKEN     = "ATTA4023879d0e1c940be777dacba0177563275e0bbbdc9b5361ecdaf4c027f9739834999E6D";   
+    const TRELLO_LIST_ID   = "685fbecf9de5902f7c319e31";   
+    const TG_BOT_TOKEN     = "6035113933:AAHJ7HebPU89cXqAGdBThDk6MglwMpZD3hw";
+    const TG_CHAT_ID       = "1039921677";
 
     /* ================= Справочники ================= */
     const LAUNCHERS = [
-      { value: "Steam",      label: "Steam",                 logo: "https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" },
-      { value: "EpicGames",  label: "Epic",                  logo: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg" },
-      { value: "SocialClub", label: "Rockstar (SocialClub)", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Rockstar_Games_Logo.svg/120px-Rockstar_Games_Logo.svg.png" }
+      { value: "Steam",      label: "Steam",      icon: "Gamepad2" },
+      { value: "EpicGames",  label: "Epic Games", icon: "Zap" },
+      { value: "SocialClub", label: "Rockstar",   icon: "Star" }
     ];
 
     const GAME_VERSIONS = [
-      { value: "Enhanced", label: "Enhanced" },
-      { value: "Legacy",   label: "Legacy" }
+      { value: "Enhanced", label: "Enhanced (Next Gen)", desc: "PS5 / Xbox Series" },
+      { value: "Legacy",   label: "Legacy", desc: "PC / Old Gen" }
     ];
 
     const MONEY_OPTIONS = [
-      "25 млн","50 млн","75 млн",
-      "100 млн","150 млн","190 млн",
-      "250 млн","500 млн","750 млн",
-      "1 млрд","2 млрд","3 млрд","4 млрд"
-    ];
-
-    const EXTRA_LEVELS = [
-      "8000 уровень банды",
-      "1000 уровень арены",
-      "1000 уровень автоклуба"
+      "25 млн","50 млн","75 млн", "100 млн","150 млн","250 млн","500 млн","1 млрд","2 млрд","5 млрд"
     ];
 
     const UNLOCKS_MAIN = [
-      "Открыть все скиллы","Открыть LSC тюнинг","Открыть оружие","Открыть маски",
-      "Открыть одежду","Открыть парашюты","Открыть татуировки","Открыть все достижения",
-      "Открыть контакты в телефоне"
+      "Все навыки (100%)", "LSC Тюнинг", "Все оружие", "Редкие маски",
+      "Одежда", "Парашюты", "Татуировки", "Достижения", "Контакты"
     ];
 
     const UNLOCKS_EXTRA = [
-      "Открыть разработки бункера","Открыть награды тира в бункере","Удалить статус «ненадёжный»",
-      "Открыть косатку для покупки",
+      "Бункер (разработки)", "Тир (награды)", "Снять Bad Sport", "Открыть Косатку"
     ];
 
-    // Реквизиты
     const REQUISITES = [
-      { label: "💚 Сбербанк — 2202 2032 9079 4421",              copy: "2202203290794421" },
-      { label: "❤️ Альфа-Банк — 2200 1509 9435 5391",            copy: "2200150994355391" },
-      { label: "💛 Т-Банк — 2200 7001 1816 8359",                 copy: "2200700118168359" },
-      { label: "🌐 Donatty — donatty.com/marktvenboost",          copy: "donatty.com/marktvenboost" },
-      { label: "💛 ЮMoney — yoomoney.ru/to/410014747956154",      copy: "yoomoney.ru/to/410014747956154" }
+      { label: "Сбербанк",  num: "2202 2032 9079 4421", color: "text-green-400" },
+      { label: "Альфа-Банк", num: "2200 1509 9435 5391", color: "text-red-400" },
+      { label: "Т-Банк",    num: "2200 7001 1816 8359", color: "text-yellow-400" },
+      { label: "ЮMoney",    num: "410014747956154",     color: "text-purple-400" },
     ];
 
-    /* ================= Утилиты ================= */
+    /* ================= Компоненты UI ================= */
+    const Icon = ({ name, className }) => {
+      React.useEffect(() => lucide.createIcons(), []);
+      return <i data-lucide={name} className={className}></i>;
+    };
+
+    const SectionTitle = ({ number, title, sub }) => (
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gta-green text-black font-bold font-display text-lg shadow-[0_0_10px_#2ecc71]">
+            {number}
+          </span>
+          <h2 className="text-2xl font-display font-bold text-white uppercase tracking-wide">{title}</h2>
+        </div>
+        {sub && <p className="text-slate-400 text-sm ml-11">{sub}</p>}
+      </div>
+    );
+
+    /* ================= Логика ================= */
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
-    const Req = () => <span className="text-red-500">*</span>;
-
-    function copyToClipboard(text){
-      if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(text).catch(fallback); }
-      else fallback();
-      function fallback(){ const t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
-    }
-
-    function useTheme(){
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const [dark,setDark] = React.useState(localStorage.getItem('theme') ? localStorage.getItem('theme')==='dark' : prefersDark);
-      React.useEffect(()=>{ const html=document.documentElement; dark?html.classList.add('dark'):html.classList.remove('dark'); localStorage.setItem('theme',dark?'dark':'light'); },[dark]);
-      return [dark,setDark];
-    }
-
-    /* ================= Trello/Telegram helpers ================= */
+    
     async function trelloPOST(url,params){
       const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN);
       Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
@@ -110,524 +169,354 @@
       if(!r.ok) throw new Error(await r.text());
       return r.json();
     }
-    async function trelloPUT(url,params){
-      const u=new URL(url); u.searchParams.set("key",TRELLO_KEY); u.searchParams.set("token",TRELLO_TOKEN);
-      Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
-      const r=await fetch(u.toString(),{method:"PUT"});
-      if(!r.ok) throw new Error(await r.text());
-      return r.json();
-    }
+    
     async function sendTelegramMessage(text){
       if(!TG_BOT_TOKEN||!TG_CHAT_ID) return;
       try{
-        const r=await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
+        await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`,{
           method:"POST", headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ chat_id:TG_CHAT_ID, text, parse_mode:"HTML", disable_web_page_preview:true })
+          body:JSON.stringify({ chat_id:TG_CHAT_ID, text, parse_mode:"HTML" })
         });
-        if(!r.ok) console.warn("Telegram error:", await r.text());
-      }catch(e){ console.warn("Telegram send failed:", e?.message||e); }
+      }catch(e){ console.warn("TG Error", e); }
     }
 
-    /* ================= Компонент ================= */
-    function GTAOrderForm(){
-      const [dark,setDark] = useTheme();
+    function App() {
+      // Состояния формы
+      const [launcher, setLauncher] = React.useState(LAUNCHERS[0].value);
+      const [version, setVersion] = React.useState(GAME_VERSIONS[0].value);
+      const [login, setLogin] = React.useState("");
+      const [password, setPassword] = React.useState("");
+      const [money, setMoney] = React.useState(null);
+      const [noMoney, setNoMoney] = React.useState(false);
+      const [level, setLevel] = React.useState("");
+      const [unlocks, setUnlocks] = React.useState([]);
+      const [contacts, setContacts] = React.useState("");
+      const [bank, setBank] = React.useState("");
+      const [paymentTime, setPaymentTime] = React.useState("");
+      
+      // Состояния UI
+      const [submitting, setSubmitting] = React.useState(false);
+      const [showPreview, setShowPreview] = React.useState(false);
+      const [success, setSuccess] = React.useState(null);
 
-      const [launcher,setLauncher] = React.useState(LAUNCHERS[0].value);
-      const [version,setVersion]   = React.useState(GAME_VERSIONS[0].value);
-      const [login,setLogin]       = React.useState("");
-      const [password,setPassword] = React.useState("");
-      const [money,setMoney]       = React.useState(null);
-      const [noMoney,setNoMoney]   = React.useState(false);
+      const loginNeedsEmail = launcher === "EpicGames" || launcher === "SocialClub";
 
-      const [level,setLevel]       = React.useState("");
-      const [extraLevels,setExtraLevels] = React.useState([]);
-      const [extraLevelInputs,setExtraLevelInputs] = React.useState({}); // {label: "число"}
-      const [mainUnlocks,setMainUnlocks]   = React.useState([]);
-      const [extraUnlocks,setExtraUnlocks] = React.useState([]);
+      // Валидация
+      const isValid = React.useMemo(() => {
+        if (!login || !password || !level || !contacts || !bank || !paymentTime) return false;
+        if (loginNeedsEmail && !emailRegex.test(login)) return false;
+        if (!noMoney && !money) return false;
+        return true;
+      }, [login, password, level, contacts, bank, paymentTime, noMoney, money, loginNeedsEmail]);
 
-      const [contacts,setContacts] = React.useState("");
+      const toggleUnlock = (u) => {
+        setUnlocks(prev => prev.includes(u) ? prev.filter(x => x !== u) : [...prev, u]);
+      };
 
-      // ➜ Новый блок выбора банка и времени платежа
-      const [bank,setBank] = React.useState("");           // хранит полный label (для отправки)
-      const [paymentTime,setPaymentTime] = React.useState(""); // произвольный текст (примерное время)
-      const [showRequisites,setShowRequisites] = React.useState(false); // показать/скрыть список реквизитов
+      // Сабмит
+      const handleSubmit = async () => {
+        setSubmitting(true);
+        try {
+          const desc = `
+🚀 **ЗАЯВКА С САЙТА**
+👤 **Контакты:** ${contacts}
+🎮 **Платформа:** ${launcher} (${version})
+💰 **Валюта:** ${noMoney ? "Нет" : money}
+⭐ **Уровень:** ${level}
+🔐 **Вход:** ${login} / ${password}
+🏦 **Оплата:** ${bank} (~${paymentTime})
+🎁 **Анлоки:** ${unlocks.join(", ") || "Нет"}
+          `;
 
-      const [submitting,setSubmitting] = React.useState(false);
-      const [error,setError] = React.useState(null);
-      const [success,setSuccess] = React.useState(null);
-      const [showPreview,setShowPreview] = React.useState(false);
-      const [modalAnimClass,setModalAnimClass] = React.useState("modal-enter");
-
-      const loginNeedsEmail = launcher==="EpicGames" || launcher==="SocialClub";
-
-      // валидации
-      const levelIsValid = React.useMemo(()=>{
-        if(!level) return false; const n=Number(level);
-        return Number.isInteger(n)&&n>=1&&n<=8000;
-      },[level]);
-
-      const loginIsValid = React.useMemo(()=>{
-        if(!login.trim()) return false;
-        return loginNeedsEmail ? emailRegex.test(login.trim()) : true;
-      },[login,loginNeedsEmail]);
-
-      // прогресс-бар: требуем выбрать банк и указать прим. время платежа
-      const progress = React.useMemo(()=>{
-        const parts = [
-          !!launcher, !!version, loginIsValid, !!password.trim(),
-          levelIsValid, !!contacts.trim(), (money!==null || noMoney),
-          !!bank, !!paymentTime.trim()
-        ];
-        return Math.round(parts.filter(Boolean).length / parts.length * 100);
-      }, [launcher,version,loginIsValid,password,levelIsValid,contacts,money,noMoney,bank,paymentTime]);
-
-      // готовность отправки
-      const canSubmit = progress===100;
-
-      function toggleInArray(v, list, setter){
-        setter(list.includes(v) ? list.filter(x=>x!==v) : [...list, v]);
-      }
-
-      // форматирование блока «Отдельные уровни»
-      function formatExtraLevels(){
-        if(!extraLevels.length) return "—";
-        return extraLevels.map(lbl => {
-          const v = (extraLevelInputs[lbl] || "").trim();
-          return v ? `${lbl}: ${v}` : lbl;
-        }).join(", ");
-      }
-
-      // Отправка в Trello/Telegram
-      async function createTrelloCard(){
-        const title = `ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`;
-
-        const descLines = [
-          `Лаунчер: ${launcher}`,
-          `Версия: ${version}`,
-          `Логин: ${login}`,
-          `Пароль: ${password}`,
-          `Игровая валюта: ${noMoney ? "— (без валюты)" : (money ?? "не выбрано")}`,
-          `Уровень персонажа: ${level}`,
-          `Отдельные уровни: ${formatExtraLevels()}`,
-          `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
-          `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
-          `Банк для оплаты: ${bank || "—"}`,
-          `Время платежа (примерно): ${paymentTime || "—"}`,
-          `Контакты: ${contacts}`,
-          `Источник: форма заявки`
-        ];
-
-        const card = await trelloPOST("https://api.trello.com/1/cards", {
-          idList: TRELLO_LIST_ID,
-          name: title,
-          desc: descLines.join("\n")
-        });
-
-        const checklist = await trelloPOST(`https://api.trello.com/1/cards/${card.id}/checklists`,{ name:"Ответы заявки" });
-
-        let idx = 1;
-        const items = [
-          `Лаунчер: ${launcher}`,
-          `Версия: ${version}`,
-          `Логин: ${login}`,
-          `Пароль: ${password || "—"}`,
-          `Игровая валюта: ${noMoney ? "— (без валюты)" : (money ?? "—")}`,
-          `Уровень: ${level}`,
-          `Отдельные уровни: ${formatExtraLevels()}`,
-          `🔓 Основные: ${mainUnlocks.length ? mainUnlocks.join(", ") : "—"}`,
-          `🔓 Дополнительно: ${extraUnlocks.length ? extraUnlocks.join(", ") : "—"}`,
-          `Банк для оплаты: ${bank || "—"}`,
-          `Время платежа (примерно): ${paymentTime || "—"}`,
-          `Контакты: ${contacts}`
-        ].map(t => `${idx++}. ${t}`);
-
-        for(const text of items){
-          await trelloPOST(`https://api.trello.com/1/checklists/${checklist.id}/checkItems`,{ name: text });
-        }
-
-        if(card.idShort){
-          await trelloPUT(`https://api.trello.com/1/cards/${card.id}/name`,{
-            value: `#${card.idShort} ПРОКАЧКА GTA ONLINE — ${contacts || "без контактов"}`
+          // Trello
+          const card = await trelloPOST("https://api.trello.com/1/cards", {
+            idList: TRELLO_LIST_ID,
+            name: `Order: ${contacts}`,
+            desc: desc
           });
-        }
 
-        await sendTelegramMessage(
-          `<b>Новая заявка #${card.idShort ?? card.id}</b>\n`+
-          `Лаунчер: ${launcher}\nВерсия: ${version}\n`+
-          `Валюта: ${noMoney ? "—" : (money ?? "—")} | Уровень: ${level}\n`+
-          `Банк: ${bank || "—"}\n`+
-          `Время платежа (≈): ${paymentTime || "—"}\n`+
-          `Контакты: ${contacts}`
-        );
+          // Telegram
+          await sendTelegramMessage(
+            `<b>⚡ НОВАЯ ЗАЯВКА #${card.idShort || "?"}</b>\n\n` +
+            `👤 ${contacts}\n` +
+            `🎮 ${launcher} | ${version}\n` +
+            `💰 ${money || "0"} | ⭐ ${level}\n` +
+            `🏦 ${bank} (${paymentTime})`
+          );
 
-        return card;
-      }
-
-      // Конфетти 🎉
-      function fireConfetti(){
-        if(!window.confetti) return;
-        const duration=1300, end=Date.now()+duration;
-        (function frame(){
-          window.confetti({particleCount:3,angle:60,spread:60,origin:{x:0,y:0.8}});
-          window.confetti({particleCount:3,angle:120,spread:60,origin:{x:1,y:0.8}});
-          if(Date.now()<end) requestAnimationFrame(frame);
-        })();
-      }
-
-      async function handleConfirmSubmit(){
-        try{
-          setSubmitting(true);
-          const card = await createTrelloCard();
-          setSuccess(`Заявка отправлена! Номер карточки: #${card.idShort ?? card.id}`);
+          setSuccess(card.idShort);
           setShowPreview(false);
-          fireConfetti();
+          window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+          
+          // Reset
+          setLogin(""); setPassword(""); setContacts("");
+        } catch (e) {
+          alert("Ошибка отправки: " + e.message);
+        } finally {
+          setSubmitting(false);
+        }
+      };
 
-          // сброс формы
-          setLauncher(LAUNCHERS[0].value);
-          setVersion(GAME_VERSIONS[0].value);
-          setLogin(""); setPassword("");
-          setMoney(null); setNoMoney(false);
-          setLevel(""); setExtraLevels([]); setExtraLevelInputs({});
-          setMainUnlocks([]); setExtraUnlocks([]);
-          setContacts(""); setBank(""); setPaymentTime("");
-          setShowRequisites(false);
-        }catch(err){
-          console.error(err); setError(err.message || "Ошибка при отправке");
-        }finally{ setSubmitting(false); }
-      }
-
-      React.useEffect(()=>{
-        if(showPreview){ requestAnimationFrame(()=>setModalAnimClass("modal-enter-active")); }
-        else { setModalAnimClass("modal-enter"); }
-      },[showPreview]);
-
-      const currentLauncher = LAUNCHERS.find(l=>l.value===launcher);
-
-      /* ================= Render ================= */
-      return (
-        <div className="min-h-screen">
-          {/* Тулбар + тема + плавный прогресс */}
-          <div className="sticky top-0 z-20 backdrop-blur bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800">
-            <div className="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                {currentLauncher?.logo && <img src={currentLauncher.logo} alt={currentLauncher.label} className="w-6 h-6 object-contain" />}
-                <div className="font-semibold text-slate-700 dark:text-slate-200">ПРОКАЧКА GTA ONLINE — заявка</div>
+      if (success) {
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="glass max-w-lg w-full p-10 rounded-3xl text-center border-t-4 border-gta-green animate-fade-in-up">
+              <div className="w-20 h-20 bg-gta-green/20 rounded-full flex items-center justify-center mx-auto mb-6 text-gta-green">
+                <Icon name="check-circle" className="w-10 h-10" />
               </div>
-              <button className="press text-sm px-3 py-1 rounded-md border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={()=>setDark(d=>!d)} type="button">
-                {dark ? "🌙 Тёмная" : "☀️ Светлая"}
+              <h2 className="text-3xl font-display font-bold text-white mb-2">Заявка принята!</h2>
+              <p className="text-slate-300 text-lg mb-6">Ваш номер заказа: <span className="text-gta-green font-bold text-xl">#{success}</span></p>
+              <p className="text-sm text-slate-500 mb-8">Менеджер скоро свяжется с вами по указанным контактам.</p>
+              <button onClick={() => setSuccess(null)} className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-slate-200 transition">
+                Вернуться на главную
               </button>
             </div>
-            <div className="w-full h-1 bg-slate-200 dark:bg-slate-800">
-              <div className="h-1 bg-emerald-500 transition-[width] duration-500 ease-in-out will-change-[width]" style={{ width: `${progress}%` }} />
-            </div>
           </div>
+        );
+      }
 
-          <div className="max-w-5xl mx-auto px-4 py-8 text-slate-800 dark:text-slate-100">
-            <header className="text-center mb-8">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">ПРОКАЧКА GTA ONLINE</h1>
-              <p className="mt-2 text-slate-600 dark:text-slate-300">Заполните форму — заказ сразу будет добавлен в очередь.</p>
-            </header>
+      return (
+        <div className="pb-20">
+          {/* === HERO SECTION === */}
+          <header className="relative h-[80vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 z-[-1]"></div>
+            <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-[#0f172a] to-transparent"></div>
+            
+            <span className="inline-block px-4 py-1 rounded-full bg-gta-green/10 text-gta-green border border-gta-green/20 text-sm font-bold tracking-wider mb-6 animate-fade-in-up">
+              PREMIUM BOOSTING SERVICE
+            </span>
+            <h1 className="text-5xl md:text-7xl font-display font-black text-white mb-6 leading-tight drop-shadow-2xl animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+              ПРОКАЧАЙ <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">GTA ONLINE</span><br/>
+              ДО МАКСИМУМА
+            </h1>
+            <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              Безопасно. Быстро. Анонимно. Мы делаем всю грязную работу, пока вы наслаждаетесь результатом.
+            </p>
+            <a href="#order-form" className="group relative px-8 py-4 bg-gta-green text-black font-bold text-lg rounded-full overflow-hidden shadow-[0_0_20px_rgba(46,204,113,0.4)] transition hover:scale-105 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+              <span className="relative z-10 flex items-center gap-2">
+                Заполнить заявку <Icon name="arrow-down" className="w-5 h-5 group-hover:translate-y-1 transition" />
+              </span>
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+            </a>
+          </header>
 
-            <form className="space-y-8" onSubmit={(e)=>{ e.preventDefault(); if(canSubmit) setShowPreview(true); }}>
-              {/* 1. Лаунчер */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-semibold">В каком лаунчере куплена игра?</h2>
-                  {currentLauncher?.logo && <img src={currentLauncher.logo} alt={currentLauncher.label} className="w-8 h-8 object-contain" />}
+          {/* === FEATURES === */}
+          <section className="max-w-6xl mx-auto px-4 py-16 grid md:grid-cols-3 gap-6">
+            {[
+              { icon: "shield-check", title: "100% Безопасно", desc: "Используем приватные методы, без банов." },
+              { icon: "zap", title: "Моментально", desc: "Приступаем к заказу сразу после оплаты." },
+              { icon: "gift", title: "Бонусы", desc: "Дополнительные анлоки к каждому заказу." }
+            ].map((f, i) => (
+              <div key={i} className="glass p-6 rounded-2xl flex flex-col items-center text-center hover:bg-slate-800/80 transition duration-300 border-t border-white/5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center mb-4 text-gta-green shadow-lg">
+                  <Icon name={f.icon} className="w-6 h-6" />
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {LAUNCHERS.map(opt=>{
-                    const active=launcher===opt.value;
-                    return (
-                      <label key={opt.value} className={`press cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${active?"border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm":"border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
-                        <input type="radio" name="launcher" className="sr-only" checked={active} onChange={()=>setLauncher(opt.value)} />
-                        <img src={opt.logo} alt={opt.label} className="w-6 h-6 object-contain" />
-                        <span className="font-medium">{opt.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </section>
+                <h3 className="text-xl font-bold font-display text-white mb-2">{f.title}</h3>
+                <p className="text-slate-400 text-sm">{f.desc}</p>
+              </div>
+            ))}
+          </section>
 
-              {/* 2. Версия */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold mb-3">Выберите версию игры</h2>
-                <div className="flex flex-wrap gap-3">
-                  {GAME_VERSIONS.map(opt=>{
-                    const active=version===opt.value;
-                    return (
-                      <label key={opt.value} className={`press cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${active?"border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm":"border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
-                        <input type="radio" name="gameVersion" className="sr-only" checked={active} onChange={()=>setVersion(opt.value)} />
-                        <span className="font-medium">{opt.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </section>
+          {/* === FORM SECTION === */}
+          <main id="order-form" className="max-w-4xl mx-auto px-4 mt-10">
+            <div className="glass rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
+              {/* Decorative background blur inside form */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gta-green/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
-              {/* 3. Данные входа */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold mb-4">Данные входа</h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">{(launcher==="EpicGames"||launcher==="SocialClub")?"Почта":"Логин"} <Req/></label>
-                    <input
-                      type={(launcher==="EpicGames"||launcher==="SocialClub")?"email":"text"}
-                      className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${(!loginIsValid && login) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                      placeholder={(launcher==="EpicGames"||launcher==="SocialClub")?"email@example.com":"Введите логин"}
-                      value={login}
-                      onChange={(e)=>{ let v=e.target.value.trim(); if(launcher==="EpicGames"||launcher==="SocialClub") v=v.toLowerCase(); setLogin(v); }}
-                      required
-                    />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Steam — логин | Epic — почта | Rockstar — почта от SocialClub</p>
-                    {(launcher==="EpicGames"||launcher==="SocialClub") && login && !emailRegex.test(login.trim()) && <p className="text-xs text-red-500 mt-1">Введите корректный адрес электронной почты.</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Пароль <Req/></label>
-                    <input type="password" className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition" placeholder="Введите пароль" value={password} onChange={(e)=>setPassword(e.target.value)} required />
-                  </div>
-                </div>
-              </section>
-
-              {/* 4. Валюта */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold mb-3">💰 Количество игровой валюты</h2>
-                <div className={`grid grid-cols-2 md:grid-cols-3 gap-2 ${noMoney ? "opacity-50 pointer-events-none" : ""}`}>
-                  {MONEY_OPTIONS.map(opt=>{
-                    const active = money===opt;
-                    return (
-                      <label key={opt} className={`press cursor-pointer rounded-xl border px-4 py-2 text-sm text-center transition ${active?"border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm":"border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50"}`}>
-                        <input type="radio" name="money" className="sr-only" checked={active} onChange={()=>setMoney(opt)} disabled={noMoney} />
-                        {opt}
-                      </label>
-                    );
-                  })}
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <input id="noMoney" type="checkbox" className="h-4 w-4 accent-emerald-500"
-                    checked={noMoney}
-                    onChange={(e)=>{ const v=e.target.checked; setNoMoney(v); if(v) setMoney(null); }} />
-                  <label htmlFor="noMoney" className="text-sm select-none">Без игровой валюты — только услуги (разблокировки/уровни)</label>
-                </div>
-                {money===null && !noMoney && <p className="mt-2 text-xs text-red-500">Выберите сумму или включите «Без игровой валюты».</p>}
-              </section>
-
-              {/* 5. Какой уровень персонажа сделать? */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <label className="block text-sm font-medium mb-1">Какой уровень персонажа сделать? <Req/></label>
-                <input
-                  type="number" min="1" max="8000"
-                  className={`w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border px-4 py-2 outline-none transition ${level && !(Number.isInteger(Number(level)) && Number(level)>=1 && Number(level)<=8000) ? "border-red-500 focus:border-red-500" : "border-slate-300 dark:border-slate-700 focus:border-emerald-400"}`}
-                  placeholder="Например: 500"
-                  value={level}
-                  onChange={(e)=>setLevel(e.target.value.replace(/[^\d]/g,'').slice(0,4))}
-                  required
-                />
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">от 1 до 8000</p>
-              </section>
-
-              {/* 6. Отдельные уровни */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold mb-3">Отдельные уровни</h2>
-                <div className="space-y-3">
-                  {EXTRA_LEVELS.map((label)=>{
-                    const checked = extraLevels.includes(label);
-                    const defaultHint = (label.match(/\d{2,4}/)?.[0]) || "";
-                    const value = extraLevelInputs[label] ?? "";
-                    return (
-                      <div key={label} className="flex items-center gap-3">
-                        <label className="press flex items-center gap-3 cursor-pointer flex-1">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 accent-emerald-500"
-                            checked={checked}
-                            onChange={()=>{
-                              setExtraLevels(checked ? extraLevels.filter(x=>x!==label) : [...extraLevels, label]);
-                              if(checked){
-                                setExtraLevelInputs(prev=>{ const c={...prev}; delete c[label]; return c; });
-                              }else{
-                                setExtraLevelInputs(prev=>({ ...prev, [label]: prev[label] ?? "" }));
-                              }
-                            }}
-                          />
-                          <span>{label}</span>
-                        </label>
-                        {checked && (
-                          <input
-                            type="number" min="1" max="8000" inputMode="numeric"
-                            placeholder={defaultHint || "уровень"}
-                            className="w-28 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-3 py-1.5 outline-none focus:border-emerald-400 transition text-sm"
-                            value={value}
-                            onChange={(e)=>{ const v=e.target.value.replace(/[^\d]/g,"").slice(0,4); setExtraLevelInputs(prev=>({ ...prev, [label]: v })); }}
-                          />
-                        )}
+              <form onSubmit={(e) => { e.preventDefault(); if(isValid) setShowPreview(true); }}>
+                
+                {/* 1. ПЛАТФОРМА */}
+                <SectionTitle number="1" title="Платформа" sub="Где куплена игра?" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10">
+                  {LAUNCHERS.map(l => (
+                    <label key={l.value} className={`relative cursor-pointer group`}>
+                      <input type="radio" name="launcher" className="peer sr-only" checked={launcher===l.value} onChange={()=>setLauncher(l.value)} />
+                      <div className="p-4 rounded-xl border border-slate-700 bg-slate-800/50 peer-checked:bg-gta-green/10 peer-checked:border-gta-green peer-checked:shadow-[0_0_15px_rgba(46,204,113,0.2)] transition-all h-full flex flex-col items-center justify-center gap-2 hover:bg-slate-700/50 press-effect">
+                        <Icon name={l.icon} className={`w-8 h-8 ${launcher===l.value ? 'text-gta-green' : 'text-slate-400'}`} />
+                        <span className={`font-medium ${launcher===l.value ? 'text-white' : 'text-slate-400'}`}>{l.label}</span>
                       </div>
-                    );
-                  })}
-                </div>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Укажите желаемый уровень (1–8000) для отмеченных пунктов.</p>
-              </section>
-
-              {/* 7. 🔓 Основные разблокировки */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold mb-3">🔓 Основные разблокировки</h2>
-                <div className="space-y-2">
-                  {UNLOCKS_MAIN.map(label=>(
-                    <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-emerald-500"
-                        checked={mainUnlocks.includes(label)}
-                        onChange={()=>toggleInArray(label, mainUnlocks, setMainUnlocks)}
-                      />
-                      <span>{label}</span>
                     </label>
                   ))}
                 </div>
-              </section>
 
-              {/* 8. 🔓 Дополнительно */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-semibold mb-3">🔓 Дополнительно</h2>
-                <div className="space-y-2">
-                  {UNLOCKS_EXTRA.map(label=>(
-                    <label key={label} className="press flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-emerald-500"
-                        checked={extraUnlocks.includes(label)}
-                        onChange={()=>toggleInArray(label, extraUnlocks, setExtraUnlocks)}
-                      />
-                      <span>{label}</span>
-                    </label>
-                  ))}
+                {/* 2. ВЕРСИЯ */}
+                <div className="mb-10">
+                  <h3 className="text-white font-medium mb-3 ml-2">Версия игры</h3>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {GAME_VERSIONS.map(v => (
+                      <label key={v.value} className="flex-1 cursor-pointer">
+                        <input type="radio" name="ver" className="peer sr-only" checked={version===v.value} onChange={()=>setVersion(v.value)} />
+                        <div className="p-3 rounded-xl border border-slate-700 bg-slate-800/50 peer-checked:border-gta-green peer-checked:text-white text-slate-400 transition hover:bg-slate-700/50">
+                          <div className="font-bold">{v.label}</div>
+                          <div className="text-xs opacity-70">{v.desc}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </section>
 
-              {/* 9. Контакты для связи */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <label className="block text-sm font-medium mb-1">Контакты для связи <Req/></label>
-                <input
-                  type="text"
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-2 outline-none focus:border-emerald-400 transition"
-                  placeholder="Например: https://vk.com/id123 или https://t.me/username"
-                  value={contacts}
-                  onChange={(e)=>setContacts(e.target.value.trim())}
-                  required
-                />
-              </section>
+                {/* 3. ВАЛЮТА И УРОВЕНЬ */}
+                <SectionTitle number="2" title="Прокачка" sub="Сколько денег и какой уровень?" />
+                
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-sm text-slate-300 font-medium">Сумма валюты</label>
+                    <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                      <input type="checkbox" checked={noMoney} onChange={(e) => { setNoMoney(e.target.checked); if(e.target.checked) setMoney(null); }} className="accent-gta-green" />
+                      Мне не нужна валюта
+                    </label>
+                  </div>
+                  <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 transition-opacity ${noMoney ? 'opacity-30 pointer-events-none' : ''}`}>
+                    {MONEY_OPTIONS.map(opt => (
+                      <label key={opt} className="cursor-pointer">
+                        <input type="radio" name="money" className="peer sr-only" checked={money===opt} onChange={()=>setMoney(opt)} disabled={noMoney} />
+                        <div className="py-2 text-center text-sm rounded-lg border border-slate-700 bg-slate-900/40 text-slate-400 peer-checked:bg-gta-green peer-checked:text-black peer-checked:font-bold peer-checked:shadow-lg transition hover:border-slate-500">
+                          {opt}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
-              {/* 10. В какой банк сделали оплату? + время платежа + реквизиты */}
-              <section className="bg-white dark:bg-slate-800/60 rounded-2xl shadow p-5 border border-slate-200 dark:border-slate-700">
-                <label htmlFor="bankSelect" className="block text-sm font-medium">
-                  В какой банк сделали оплату? <Req/>
-                </label>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                  Выберите один из доступных вариантов.
-                </p>
-
-                <select
-                  id="bankSelect"
-                  required
-                  className="w-full rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 px-4 py-3 outline-none focus:border-emerald-400 transition"
-                  value={bank}
-                  onChange={(e)=>setBank(e.target.value)}
-                >
-                  <option value="" disabled>Выберите банк/сервис</option>
-                  {REQUISITES.map((r,i)=>{
-                    const title = r.label.split("—")[0].trim(); // показываем только название
-                    return <option key={i} value={r.label}>{title}</option>;
-                  })}
-                </select>
-
-                <div className="mt-4">
-                  <label htmlFor="paymentTime" className="block text-sm font-medium">
-                    Время платежа (примерно) <Req/>
-                  </label>
-                  <input
-                    id="paymentTime"
-                    type="text"
-                    required
-                    className="mt-1 w-full rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-emerald-300 dark:border-emerald-700 px-4 py-3 outline-none focus:border-emerald-500 transition"
-                    placeholder="Например: сегодня ~18:00–20:00, или завтра утром"
-                    value={paymentTime}
-                    onChange={(e)=>setPaymentTime(e.target.value)}
+                <div className="mb-10">
+                  <label className="block text-sm text-slate-300 font-medium mb-2">Желаемый уровень (1-8000)</label>
+                  <input 
+                    type="number" min="1" max="8000"
+                    className="glass-input w-full p-4 rounded-xl text-lg font-display tracking-widest outline-none transition"
+                    placeholder="Пример: 120"
+                    value={level} onChange={(e)=>setLevel(e.target.value)}
                   />
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Можно указать диапазон или примерную формулировку: «сегодня после 19:00», «примерно обед», «в выходные».
-                  </p>
                 </div>
 
-                <div className="mt-5">
-                  <button
-                    type="button"
-                    className="press inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-600
-                               bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-base font-semibold"
-                    onClick={()=>setShowRequisites(s=>!s)}
-                  >
-                    {showRequisites ? "Скрыть реквизиты" : "Показать реквизиты"}
-                  </button>
+                {/* 4. ДОСТУПЫ */}
+                <SectionTitle number="3" title="Аккаунт" sub="Данные для входа (Шифруется)" />
+                <div className="grid md:grid-cols-2 gap-4 mb-10">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-slate-500 mb-1 ml-1">{loginNeedsEmail ? "Email" : "Логин"}</label>
+                    <div className="relative">
+                      <input 
+                        type={loginNeedsEmail ? "email" : "text"} required
+                        className="glass-input w-full pl-10 pr-4 py-3 rounded-xl outline-none"
+                        placeholder={loginNeedsEmail ? "email@domain.com" : "SteamLogin"}
+                        value={login} onChange={(e)=>setLogin(e.target.value)}
+                      />
+                      <Icon name="user" className="absolute left-3 top-3.5 w-5 h-5 text-slate-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-slate-500 mb-1 ml-1">Пароль</label>
+                    <div className="relative">
+                      <input 
+                        type="password" required
+                        className="glass-input w-full pl-10 pr-4 py-3 rounded-xl outline-none"
+                        placeholder="••••••••"
+                        value={password} onChange={(e)=>setPassword(e.target.value)}
+                      />
+                      <Icon name="lock" className="absolute left-3 top-3.5 w-5 h-5 text-slate-500" />
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs uppercase tracking-wider text-slate-500 mb-1 ml-1">Ваши Контакты (VK/TG)</label>
+                    <div className="relative">
+                      <input 
+                        type="text" required
+                        className="glass-input w-full pl-10 pr-4 py-3 rounded-xl outline-none"
+                        placeholder="t.me/username или vk.com/id..."
+                        value={contacts} onChange={(e)=>setContacts(e.target.value)}
+                      />
+                      <Icon name="message-circle" className="absolute left-3 top-3.5 w-5 h-5 text-slate-500" />
+                    </div>
+                  </div>
+                </div>
 
-                  {showRequisites && (
-                    <div className="mt-4 max-w-2xl space-y-2">
-                      {REQUISITES.map((r,i)=>(
-                        <div key={i} className="flex items-center justify-between gap-3 whitespace-nowrap">
-                          <span className="overflow-hidden text-ellipsis">{r.label}</span>
-                          <button
-                            type="button"
-                            className="press text-xs md:text-sm px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"
-                            onClick={()=>copyToClipboard(r.copy)}
-                          >
-                            Копировать
+                {/* 5. РАЗБЛОКИРОВКИ */}
+                <div className="p-5 rounded-2xl bg-slate-800/30 border border-slate-700/50 mb-10">
+                  <h3 className="text-white font-medium mb-4 flex items-center gap-2"><Icon name="unlock" className="w-4 h-4 text-gta-green" /> Разблокировки (Бесплатно)</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-2">
+                    {[...UNLOCKS_MAIN, ...UNLOCKS_EXTRA].map(u => (
+                      <label key={u} className="flex items-center gap-3 cursor-pointer group">
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition ${unlocks.includes(u) ? 'bg-gta-green border-gta-green' : 'border-slate-600 group-hover:border-slate-400'}`}>
+                          {unlocks.includes(u) && <Icon name="check" className="w-3 h-3 text-black" />}
+                        </div>
+                        <input type="checkbox" className="hidden" checked={unlocks.includes(u)} onChange={()=>toggleUnlock(u)} />
+                        <span className={`text-sm ${unlocks.includes(u) ? 'text-white' : 'text-slate-400'}`}>{u}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 6. ОПЛАТА */}
+                <SectionTitle number="4" title="Оплата" sub="Реквизиты и подтверждение" />
+                <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700 mb-6">
+                  <p className="text-sm text-slate-400 mb-4 text-center">Выберите банк и переведите сумму по реквизитам, затем заполните поля ниже.</p>
+                  <div className="space-y-3">
+                    {REQUISITES.map((r, i) => (
+                      <div key={i} className="flex flex-col sm:flex-row justify-between items-center bg-slate-800/50 p-3 rounded-lg border border-white/5">
+                        <span className={`font-bold ${r.color}`}>{r.label}</span>
+                        <div className="flex items-center gap-3 mt-2 sm:mt-0">
+                          <span className="font-mono text-slate-200 tracking-wider">{r.num}</span>
+                          <button type="button" onClick={() => navigator.clipboard.writeText(r.num.replace(/\s/g,''))} className="p-1 hover:text-white text-slate-500 transition">
+                            <Icon name="copy" className="w-4 h-4" />
                           </button>
                         </div>
-                      ))}
-                      <p className="text-xs text-red-500 mt-2">
-                        Для оплаты скопируйте нужный номер!
-                      </p>
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </section>
+                
+                <div className="grid md:grid-cols-2 gap-4 mb-8">
+                  <div>
+                    <label className="text-sm text-slate-400 mb-1 block">Куда платили?</label>
+                    <select value={bank} onChange={(e)=>setBank(e.target.value)} className="glass-input w-full p-3 rounded-xl outline-none cursor-pointer">
+                      <option value="" disabled>Выберите банк...</option>
+                      {REQUISITES.map(r => <option key={r.label} value={r.label}>{r.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm text-slate-400 mb-1 block">Время оплаты (примерно)</label>
+                    <input type="text" placeholder="Сейчас / 18:30" className="glass-input w-full p-3 rounded-xl outline-none" value={paymentTime} onChange={(e)=>setPaymentTime(e.target.value)} />
+                  </div>
+                </div>
 
-              {/* Кнопки */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
-                <button
-                  type="submit"
-                  disabled={!canSubmit||submitting}
-                  className={`press px-6 py-3 rounded-2xl font-semibold shadow-lg transition ${canSubmit&&!submitting ? "bg-emerald-500 text-white hover:bg-emerald-400" : "bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed"}`}
+                {/* SUBMIT */}
+                <button 
+                  type="submit" 
+                  disabled={!isValid}
+                  className={`w-full py-4 rounded-xl font-bold font-display text-xl uppercase tracking-widest transition-all duration-300
+                    ${isValid 
+                      ? 'bg-gradient-to-r from-gta-green to-emerald-600 text-black shadow-[0_0_30px_rgba(46,204,113,0.4)] hover:scale-[1.02] hover:shadow-[0_0_50px_rgba(46,204,113,0.6)]' 
+                      : 'bg-slate-800 text-slate-600 cursor-not-allowed'}
+                  `}
                 >
-                  {submitting ? "Отправка..." : "Предпросмотр и отправка"}
+                  Отправить заявку
                 </button>
-                {error && <span className="text-red-500 text-sm">{error}</span>}
-                {success && <span className="text-emerald-500 text-sm">{success}</span>}
-              </div>
-            </form>
-          </div>
 
-          {/* Модалка предпросмотра */}
+              </form>
+            </div>
+          </main>
+
+          <footer className="mt-20 text-center text-slate-600 text-sm pb-10">
+            <p>&copy; 2025 GTA Online Boost Service. Not affiliated with Rockstar Games.</p>
+          </footer>
+
+          {/* MODAL PREVIEW */}
           {showPreview && (
-            <div className="fixed inset-0 z-30 flex items-center justify-center">
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={()=>setShowPreview(false)} />
-              <div className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl mx-4 p-6 border border-slate-200 dark:border-slate-700 ${modalAnimClass}`}>
-                <h3 className="text-xl font-semibold mb-4">Проверьте данные перед отправкой</h3>
-                <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                  <div><span className="font-medium">Лаунчер:</span> {launcher}</div>
-                  <div><span className="font-medium">Версия:</span> {version}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">{(loginNeedsEmail)?"Почта":"Логин"}:</span> {login}</div>
-                  <div><span className="font-medium">Валюта:</span> {noMoney ? "— (без валюты)" : (money || "—")}</div>
-                  <div><span className="font-medium">Уровень:</span> {level}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">Отдельные уровни:</span> {formatExtraLevels()}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">🔓 Основные:</span> {mainUnlocks.length?mainUnlocks.join(", "):"—"}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">🔓 Дополнительно:</span> {extraUnlocks.length?extraUnlocks.join(", "):"—"}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">Контакты:</span> {contacts}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">Банк для оплаты:</span> {bank || "—"}</div>
-                  <div className="sm:col-span-2"><span className="font-medium">Время платежа (примерно):</span> {paymentTime || "—"}</div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={()=>!submitting && setShowPreview(false)}></div>
+              <div className="relative bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl p-6 shadow-2xl animate-fade-in-up">
+                <h3 className="text-xl font-bold text-white mb-4">Подтверждение</h3>
+                <div className="space-y-2 text-sm text-slate-300 mb-6 bg-slate-800/50 p-4 rounded-xl">
+                  <div className="flex justify-between border-b border-white/5 pb-2"><span>Платформа:</span> <span className="text-white">{launcher}</span></div>
+                  <div className="flex justify-between border-b border-white/5 pb-2"><span>Валюта:</span> <span className="text-gta-green">{money || "Нет"}</span></div>
+                  <div className="flex justify-between border-b border-white/5 pb-2"><span>Уровень:</span> <span className="text-white">{level}</span></div>
+                  <div className="flex justify-between border-b border-white/5 pb-2"><span>Оплата:</span> <span className="text-white">{bank}</span></div>
+                  <div className="flex justify-between"><span>Связь:</span> <span className="text-white">{contacts}</span></div>
                 </div>
-
-                <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                  <button type="button" className="press px-5 py-2 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700" onClick={()=>setShowPreview(false)}>Назад</button>
-                  <button type="button" className="press px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-semibold" onClick={handleConfirmSubmit} disabled={submitting}>{submitting ? "Отправка..." : "Подтвердить и отправить"}</button>
+                <div className="flex gap-3">
+                  <button onClick={()=>setShowPreview(false)} disabled={submitting} className="flex-1 py-3 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Назад</button>
+                  <button onClick={handleSubmit} disabled={submitting} className="flex-1 py-3 rounded-lg bg-gta-green text-black font-bold hover:bg-emerald-400 transition flex justify-center items-center gap-2">
+                    {submitting ? <Icon name="loader" className="w-5 h-5 animate-spin" /> : "ПОДТВЕРДИТЬ"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -636,8 +525,8 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<GTAOrderForm />);
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
-```
